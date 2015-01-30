@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+    <!-- Main plugin class -->
+    <class>org.tttalk.openfire.plugin.TranslatorPlugin</class>
+
+    <name>TTTalk Translator</name>
+    <description>Messages sent to tttalk.translator to translate.</description>
+    <author>tttalk.org</author>
+    <version>1.0</version>
+    <date>01/30/2015</date>
+    <minServerVersion>3.9.0</minServerVersion>
+
+</plugin>
