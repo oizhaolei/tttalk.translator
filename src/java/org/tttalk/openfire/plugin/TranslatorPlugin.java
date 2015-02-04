@@ -23,7 +23,6 @@ import org.xmpp.packet.Packet;
  * 2. Present a callback interface, send result to a particular user.
  * 
  * @author zhaolei
- *
  */
 public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final Logger log = LoggerFactory
@@ -63,22 +62,24 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			Message msg = (Message) packet;
 			if (msg.getType() == Message.Type.chat) {
 				if (packet.getTo().getNode().equals(getTranslator())) {
-					// REQUEST TRANSLATE
 					Element fromlang = msg.getChildElement("fromlang",
 							"http://jabber.org/protocol/tranlate");
 					Element tolang = msg.getChildElement("tolang",
 							"http://jabber.org/protocol/tranlate");
-					if (fromlang != null && tolang != null) {
+					Element callbackId = msg.getChildElement("origin_id",
+							"http://jabber.org/protocol/tranlate");
+					if (fromlang != null && tolang != null && callbackId != null) {
 						log.info(msg.toXML());
+						// TODO: CURL REQUEST TRANSLATE
+						// app_key, app_secret
 					}
 				}
 			}
 		}
 	}
 
-	public void translateCallback(String id, String user, String toContent,
+	public void translateCallback(String originId, String user, String toContent,
 			int cost) {
-
 		Message message = new Message();
 		message.setTo(user);
 		message.setFrom(getTranslator());
@@ -88,7 +89,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		Element idNode = message.addChildElement("origin_id",
 				"http://jabber.org/protocol/tranlate");
-		idNode.setText(id);
+		idNode.setText(originId);
 		Element costNode = message.addChildElement("cost",
 				"http://jabber.org/protocol/tranlate");
 		costNode.setText(String.valueOf(cost));
