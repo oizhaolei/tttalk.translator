@@ -2,7 +2,26 @@
 <classpath>
 	<classpathentry kind="src" path="src/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/works/source/xmpp/Openfire/work/lib/openfire.jar"/>
-	<classpathentry kind="lib" path="/works/source/xmpp/Openfire/work/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/bcpg-jdk15on.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/bcpkix-jdk15on.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/bcprov-jdk15on.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/commons-el.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/hsqldb.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/jasper-compiler.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/jasper-runtime.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/jdic.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/jtds.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/mail.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/mysql.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/npn-boot.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/openfire.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/postgres.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/servlet-api-schemas.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/slf4j-log4j12.jar"/>
+	<classpathentry kind="lib" path="H:/Openfire/work/lib/startup.jar"/>
+	<classpathentry kind="lib" path="lib/http-request-5.6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.7.0_25"/>
+	<classpathentry kind="lib" path="lib/org.json-20120521.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
