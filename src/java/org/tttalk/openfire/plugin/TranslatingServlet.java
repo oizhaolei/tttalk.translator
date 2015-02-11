@@ -17,11 +17,11 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class TranslatedServlet extends HttpServlet {
+public class TranslatingServlet extends HttpServlet {
 	private static final long serialVersionUID = 9008949607840140354L;
 
 	private static final Logger Log = LoggerFactory
-			.getLogger(TranslatedServlet.class);
+			.getLogger(TranslatingServlet.class);
 
 	private TranslatorPlugin plugin;
 
@@ -30,7 +30,7 @@ public class TranslatedServlet extends HttpServlet {
 		super.init(servletConfig);
 		plugin = (TranslatorPlugin) XMPPServer.getInstance().getPluginManager()
 				.getPlugin("tttalk.translator");
-		AuthCheckFilter.addExclude("tttalk.translator/translated");
+		AuthCheckFilter.addExclude("tttalk.translator/translating");
 	}
 
 	@Override
@@ -40,10 +40,7 @@ public class TranslatedServlet extends HttpServlet {
 		Log.info(request.toString());
 		String messageId = request.getParameter("message_id");
 		String user = request.getParameter("to_user");
-		String toContent = request.getParameter("to_content");
-		int cost = Integer.valueOf(request.getParameter("cost"));
-		int balance = Integer.valueOf(request.getParameter("balance"));
-		plugin.translated(messageId, user, toContent, cost, balance);
+		plugin.translating(messageId, user);
 
 		PrintWriter out = response.getWriter();
 		out.println("success");

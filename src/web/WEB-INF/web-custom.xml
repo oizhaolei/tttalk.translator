@@ -10,7 +10,18 @@
     <!-- Servlet mappings -->
     <servlet-mapping>
         <servlet-name>TranslatedServlet</servlet-name>
-        <url-pattern>/translate_callback</url-pattern>
+        <url-pattern>/translated</url-pattern>
+    </servlet-mapping>
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>TranslatingServlet</servlet-name>
+        <servlet-class>org.tttalk.openfire.plugin.TranslatingServlet</servlet-class>
+    </servlet>
+
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>TranslatingServlet</servlet-name>
+        <url-pattern>/translating</url-pattern>
     </servlet-mapping>
 
 </web-app>

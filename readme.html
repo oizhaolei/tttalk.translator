@@ -1,13 +1,12 @@
 An openfire plugin.
 
-1. Accept translate request, then call the "tttalk translate api".<br/>
-
-2. Present a callback interface, send translate result to a particular user.
+1. Present "translated" interface, send translate result to the particular user.
 
 $ cd $OPENFIRE_HOME/build
 
 $ ant plugin -Dplugin=tttalk.translator
 
-translate callback example:
+translate curl example:
 
-http://test:9090/plugins/tttalk.translator/translate_callback?callback_id=ru1Qx-215&from_user=zhao@tttalk.org/smackCli&to_content=good&cost=23
+http://test:9090/plugins/tttalk.translator/translating?message_id=1342322&to_user=zhao@tttalk.org/smackCli
+http://test:9090/plugins/tttalk.translator/translated?message_id=1342322&to_user=zhao@tttalk.org/smackCli&to_content=good&cost=23&balance=34423
