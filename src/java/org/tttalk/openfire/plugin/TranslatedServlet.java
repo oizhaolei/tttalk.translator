@@ -14,6 +14,8 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+
 /**
  *
  */
@@ -40,7 +42,8 @@ public class TranslatedServlet extends HttpServlet {
 		Log.info(request.toString());
 		String messageId = request.getParameter("message_id");
 		String user = request.getParameter("to_user");
-		String toContent = request.getParameter("to_content");
+		String toContent = new String(Base64.decode(request
+				.getParameter("to_content")));
 		int cost = Integer.valueOf(request.getParameter("cost"));
 		int balance = Integer.valueOf(request.getParameter("balance"));
 		plugin.translated(messageId, user, toContent, cost, balance);
