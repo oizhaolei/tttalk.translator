@@ -97,4 +97,25 @@ public class TranslatorPlugin implements Plugin {
 		log.info(message.toXML());
 		router.route(message);
 	}
+
+	public void qa(String[] translators, String qaId, String answer) {
+		Message message = new Message();
+		message.setFrom(getTranslator() + "@"
+				+ server.getServerInfo().getXMPPDomain());
+		String subject = "qa";
+		message.setSubject(subject);
+		message.setBody(answer);
+
+		Element tttalkNode = message.addChildElement("tttalk",
+				"http://jabber.org/protocol/tranlate");
+
+		tttalkNode.addAttribute("title", subject);
+		tttalkNode.addAttribute("qa_id", qaId);
+
+		for (String v : translators) {
+			message.setTo(v);
+			log.info(message.toXML());
+			router.route(message);
+		}
+	}
 }

@@ -24,4 +24,15 @@
         <url-pattern>/translating</url-pattern>
     </servlet-mapping>
 
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>QAServlet</servlet-name>
+        <servlet-class>org.tttalk.openfire.plugin.QAServlet</servlet-class>
+    </servlet>
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>QAServlet</servlet-name>
+        <url-pattern>/qa</url-pattern>
+    </servlet-mapping>
+
 </web-app>
