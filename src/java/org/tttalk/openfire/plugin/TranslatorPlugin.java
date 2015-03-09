@@ -16,7 +16,7 @@ import org.xmpp.packet.Message;
 /**
  * 1. Accept translate request, then call translate api.<br/>
  * 2. Present a callback interface, send result to a particular user.
- *
+ * 
  * @author zhaolei
  */
 public class TranslatorPlugin implements Plugin {
@@ -53,8 +53,8 @@ public class TranslatorPlugin implements Plugin {
 
 	private final MessageRouter router;
 
-	public void translated(String messageId, String userId,
-			String toContent, int cost, int balance) {
+	public void translated(String messageId, String userId, String toContent,
+			int cost, int balance) {
 		Message message = new Message();
 		message.setTo(userId);
 		message.setFrom(getTranslator() + "@"
@@ -133,6 +133,105 @@ public class TranslatorPlugin implements Plugin {
 
 		tttalkNode.addAttribute("title", subject);
 		tttalkNode.addAttribute("announcement_id", announcementId);
+
+		for (String v : translators) {
+			message.setTo(v);
+			log.info(message.toXML());
+			router.route(message);
+		}
+	}
+
+	public void friend(String[] translators, String friend_id, String fullname) {
+		Message message = new Message();
+		message.setFrom(getTranslator() + "@"
+				+ server.getServerInfo().getXMPPDomain());
+		String subject = "friend";
+		message.setSubject(subject);
+		message.setBody(fullname);
+
+		Element tttalkNode = message.addChildElement("tttalk",
+				"http://jabber.org/protocol/tranlate");
+
+		tttalkNode.addAttribute("title", subject);
+		tttalkNode.addAttribute("friend_id", friend_id);
+
+		for (String v : translators) {
+			message.setTo(v);
+			log.info(message.toXML());
+			router.route(message);
+		}
+	}
+
+	public void balance(String translator, String balance) {
+		Message message = new Message();
+		message.setFrom(getTranslator() + "@"
+				+ server.getServerInfo().getXMPPDomain());
+		String subject = "balance";
+		message.setSubject(subject);
+		message.setBody(balance);
+
+		Element tttalkNode = message.addChildElement("tttalk",
+				"http://jabber.org/protocol/tranlate");
+
+		tttalkNode.addAttribute("balance", balance);
+
+		message.setTo(translator);
+		log.info(message.toXML());
+		router.route(message);
+	}
+
+	public void story(String[] translators, String photo_id, String title,
+			String content) {
+		Message message = new Message();
+		message.setFrom(getTranslator() + "@"
+				+ server.getServerInfo().getXMPPDomain());
+		String subject = "story";
+		message.setSubject(subject);
+		message.setBody(content);
+
+		Element tttalkNode = message.addChildElement("tttalk",
+				"http://jabber.org/protocol/tranlate");
+
+		tttalkNode.addAttribute("photo_id", photo_id);
+		tttalkNode.addAttribute("title", title);
+		tttalkNode.addAttribute("content", content);
+
+		for (String v : translators) {
+			message.setTo(v);
+			log.info(message.toXML());
+			router.route(message);
+		}
+	}
+
+	public void present(String translator, String present_id,
+			String present_name,
+			String pic_url) {
+		Message message = new Message();
+		message.setFrom(getTranslator() + "@"
+				+ server.getServerInfo().getXMPPDomain());
+		String subject = "present";
+		message.setSubject(subject);
+		message.setBody(present_name);
+
+		Element tttalkNode = message.addChildElement("tttalk",
+				"http://jabber.org/protocol/tranlate");
+
+		tttalkNode.addAttribute("present_id", present_id);
+		tttalkNode.addAttribute("present_name", present_name);
+		tttalkNode.addAttribute("pic_url", pic_url);
+
+		message.setTo(translator);
+		log.info(message.toXML());
+		router.route(message);
+	}
+
+	public void delete(String[] translators) {
+		Message message = new Message();
+		message.setFrom(getTranslator() + "@"
+				+ server.getServerInfo().getXMPPDomain());
+		String subject = "delete";
+		message.setSubject(subject);
+		message.addChildElement("tttalk", "http://jabber.org/protocol/tranlate");
 
 		for (String v : translators) {
 			message.setTo(v);

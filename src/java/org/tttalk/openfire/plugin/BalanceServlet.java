@@ -13,20 +13,19 @@ import javax.servlet.http.HttpServletResponse;
 /**
  *
  */
-public class QAServlet extends AbstractTranslatorServlet {
+public class BalanceServlet extends AbstractTranslatorServlet {
 	private static final long serialVersionUID = 1159875340630997082L;
 	private static final Logger Log = LoggerFactory
-.getLogger(QAServlet.class);
+			.getLogger(BalanceServlet.class);
 
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		Log.info(request.toString());
 
-		String qa_id = request.getParameter("qa_id");
-		String answer = request.getParameter("answer");
-		String[] translators = request.getParameter("translators").split(",");
-		plugin.qa(translators, qa_id, answer);
+		String balance = request.getParameter("balance");
+		String translator = request.getParameter("translator");
+		plugin.balance(translator, balance);
 
 		PrintWriter out = response.getWriter();
 		out.println("success");
@@ -34,6 +33,6 @@ public class QAServlet extends AbstractTranslatorServlet {
 
 	@Override
 	String getUri() {
-		return "/qa";
+		return "/balance";
 	}
 }
