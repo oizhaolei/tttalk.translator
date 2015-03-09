@@ -22,6 +22,11 @@ import org.xmpp.packet.Message;
 public class TranslatorPlugin implements Plugin {
 	private static final Logger log = LoggerFactory
 			.getLogger(TranslatorPlugin.class);
+	public static final String PLUGIN_NAME = "tttalk.translator";
+
+	private static final String TTTALK_NAMESPACE = "http://tttalk.org/protocol/tttalk";
+	private static final String TAG_TRANSLATED = "translated";
+	private static final String TAG_TRANSLATING = "translating";
 
 	private static final String TTTALK_USER_TRANSLATOR = "tttalk.user.translator";
 
@@ -54,16 +59,16 @@ public class TranslatorPlugin implements Plugin {
 		message.setTo(userId);
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
-		String subject = "translated";
+		String subject = TAG_TRANSLATED;
 		message.setSubject(subject);
 		message.setBody(toContent);
 
-		Element tttalkNode = message.addChildElement("tttalk",
-				"http://jabber.org/protocol/tranlate");
+		Element tttalkNode = message.addChildElement(TAG_TRANSLATED,
+				TTTALK_NAMESPACE);
 		// tttalkNode.addAttribute("test", "true");
 		// tttalkNode.addAttribute("ver", "1");
 
-		tttalkNode.addAttribute("title", "translated");
+		tttalkNode.addAttribute("title", subject);
 		tttalkNode.addAttribute("message_id", messageId);
 		tttalkNode.addAttribute("cost", String.valueOf(cost));
 		tttalkNode.addAttribute("balance", String.valueOf(balance));
@@ -77,16 +82,16 @@ public class TranslatorPlugin implements Plugin {
 		message.setTo(userId);
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
-		String subject = "translated";
+		String subject = TAG_TRANSLATING;
 		message.setSubject(subject);
 		message.setBody(subject);
 
-		Element tttalkNode = message.addChildElement("tttalk",
-				"http://jabber.org/protocol/tranlate");
+		Element tttalkNode = message.addChildElement(TAG_TRANSLATING,
+				TTTALK_NAMESPACE);
 		// tttalkNode.addAttribute("test", "true");
 		// tttalkNode.addAttribute("ver", "1");
 
-		tttalkNode.addAttribute("title", "translating");
+		tttalkNode.addAttribute("title", subject);
 		tttalkNode.addAttribute("message_id", messageId);
 
 		log.info(message.toXML());
