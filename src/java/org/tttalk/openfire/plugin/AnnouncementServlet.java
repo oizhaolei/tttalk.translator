@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  *
  */
-public class QAServlet extends HttpServlet {
+public class AnnouncementServlet extends HttpServlet {
 	private static final long serialVersionUID = 1159875340630997082L;
 	private static final Logger Log = LoggerFactory
 			.getLogger(TranslatedServlet.class);
@@ -29,7 +29,7 @@ public class QAServlet extends HttpServlet {
 		super.init(servletConfig);
 		plugin = (TranslatorPlugin) XMPPServer.getInstance().getPluginManager()
 				.getPlugin("tttalk.translator");
-		AuthCheckFilter.addExclude("tttalk.translator/qa");
+		AuthCheckFilter.addExclude("tttalk.translator/announcement");
 	}
 
 	@Override
@@ -37,10 +37,10 @@ public class QAServlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		Log.info(request.toString());
 
-		String qa_id = request.getParameter("qa_id");
-		String answer = request.getParameter("answer");
+		String announcement_id = request.getParameter("announcement_id");
+		String title = request.getParameter("title");
 		String[] translators = request.getParameter("translators").split(",");
-		plugin.qa(translators, qa_id, answer);
+		plugin.qa(translators, announcement_id, title);
 
 		PrintWriter out = response.getWriter();
 		out.println("success");

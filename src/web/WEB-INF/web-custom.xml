@@ -35,4 +35,16 @@
         <url-pattern>/qa</url-pattern>
     </servlet-mapping>
 
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>AnnouncementServlet</servlet-name>
+        <servlet-class>org.tttalk.openfire.plugin.AnnouncementServlet</servlet-class>
+    </servlet>
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>AnnouncementServlet</servlet-name>
+        <url-pattern>/announcement</url-pattern>
+    </servlet-mapping>
+    
+
 </web-app>

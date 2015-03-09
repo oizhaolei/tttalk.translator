@@ -113,4 +113,26 @@ public class TranslatorPlugin implements Plugin {
 			router.route(message);
 		}
 	}
+
+	public void announcement(String[] translators, String announcementId,
+			String title) {
+		Message message = new Message();
+		message.setFrom(getTranslator() + "@"
+				+ server.getServerInfo().getXMPPDomain());
+		String subject = "announcement";
+		message.setSubject(subject);
+		message.setBody(title);
+
+		Element tttalkNode = message.addChildElement("tttalk",
+				"http://jabber.org/protocol/tranlate");
+
+		tttalkNode.addAttribute("title", subject);
+		tttalkNode.addAttribute("announcement_id", announcementId);
+
+		for (String v : translators) {
+			message.setTo(v);
+			log.info(message.toXML());
+			router.route(message);
+		}
+	}
 }
