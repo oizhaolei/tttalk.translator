@@ -32,6 +32,7 @@ public class TranslatorPlugin implements Plugin {
 	private static final String TAG_ANNOUNCEMENT = "announcement";
 	private static final String TAG_FRIEND = "friend";
 	private static final String TAG_PRESENT = "present";
+	private static final String TAG_STORY = "story";
 
 	private static final String TTTALK_USER_TRANSLATOR = "tttalk.user.translator";
 
@@ -189,12 +190,12 @@ public class TranslatorPlugin implements Plugin {
 		Message message = new Message();
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
-		String subject = "story";
+		String subject = TAG_STORY;
 		message.setSubject(subject);
 		message.setBody(content);
 
-		Element tttalkNode = message
-				.addChildElement("tttalk", TTTALK_NAMESPACE);
+		Element tttalkNode = message.addChildElement(TAG_STORY,
+				TTTALK_NAMESPACE);
 
 		tttalkNode.addAttribute("photo_id", photo_id);
 		tttalkNode.addAttribute("title", title);
