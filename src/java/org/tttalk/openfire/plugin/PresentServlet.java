@@ -24,10 +24,13 @@ public class PresentServlet extends AbstractTranslatorServlet {
 		Log.info(request.toString());
 
 		String present_id = request.getParameter("present_id");
+		String to_user_photo_id = request.getParameter("to_user_photo_id");
+		String fullname = request.getParameter("fullname");
 		String present_name = request.getParameter("present_name");
 		String pic_url = request.getParameter("pic_url");
 		String translator = request.getParameter("translator");
-		plugin.present(translator, present_id, present_name, pic_url);
+		plugin.present(translator, present_id, to_user_photo_id, fullname,
+				present_name, pic_url);
 
 		PrintWriter out = response.getWriter();
 		out.println("success");

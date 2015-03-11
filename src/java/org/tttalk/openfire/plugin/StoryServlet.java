@@ -26,8 +26,10 @@ public class StoryServlet extends AbstractTranslatorServlet {
 		String photo_id = request.getParameter("photo_id");
 		String title = request.getParameter("title");
 		String content = request.getParameter("content");
+		String fullname = request.getParameter("fullname");
+		String pic_url = request.getParameter("pic_url");
 		String[] translators = request.getParameter("translators").split(",");
-		plugin.story(translators, photo_id, title, content);
+		plugin.story(translators, photo_id, title, content, fullname, pic_url);
 
 		PrintWriter out = response.getWriter();
 		out.println("success");

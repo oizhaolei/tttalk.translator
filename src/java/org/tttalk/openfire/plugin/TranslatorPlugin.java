@@ -27,6 +27,11 @@ public class TranslatorPlugin implements Plugin {
 	private static final String TTTALK_NAMESPACE = "http://tttalk.org/protocol/tttalk";
 	private static final String TAG_TRANSLATED = "translated";
 	private static final String TAG_TRANSLATING = "translating";
+	private static final String TAG_BALANCE = "balance";
+	private static final String TAG_QA = "qa";
+	private static final String TAG_ANNOUNCEMENT = "announcement";
+	private static final String TAG_FRIEND = "friend";
+	private static final String TAG_PRESENT = "present";
 
 	private static final String TTTALK_USER_TRANSLATOR = "tttalk.user.translator";
 
@@ -102,12 +107,11 @@ public class TranslatorPlugin implements Plugin {
 		Message message = new Message();
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
-		String subject = "qa";
+		String subject = TAG_QA;
 		message.setSubject(subject);
 		message.setBody(answer);
 
-		Element tttalkNode = message.addChildElement("tttalk",
-				"http://jabber.org/protocol/tranlate");
+		Element tttalkNode = message.addChildElement(TAG_QA, TTTALK_NAMESPACE);
 
 		tttalkNode.addAttribute("title", subject);
 		tttalkNode.addAttribute("qa_id", qaId);
@@ -124,12 +128,12 @@ public class TranslatorPlugin implements Plugin {
 		Message message = new Message();
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
-		String subject = "announcement";
+		String subject = TAG_ANNOUNCEMENT;
 		message.setSubject(subject);
 		message.setBody(title);
 
-		Element tttalkNode = message.addChildElement("tttalk",
-				"http://jabber.org/protocol/tranlate");
+		Element tttalkNode = message.addChildElement(TAG_ANNOUNCEMENT,
+				TTTALK_NAMESPACE);
 
 		tttalkNode.addAttribute("title", subject);
 		tttalkNode.addAttribute("announcement_id", announcementId);
@@ -145,14 +149,14 @@ public class TranslatorPlugin implements Plugin {
 		Message message = new Message();
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
-		String subject = "friend";
+		String subject = TAG_FRIEND;
 		message.setSubject(subject);
-		message.setBody(fullname);
 
-		Element tttalkNode = message.addChildElement("tttalk",
-				"http://jabber.org/protocol/tranlate");
+		Element tttalkNode = message.addChildElement(TAG_FRIEND,
+				TTTALK_NAMESPACE);
 
 		tttalkNode.addAttribute("title", subject);
+		tttalkNode.addAttribute("fullname", fullname);
 		tttalkNode.addAttribute("friend_id", friend_id);
 
 		for (String v : translators) {
@@ -166,12 +170,12 @@ public class TranslatorPlugin implements Plugin {
 		Message message = new Message();
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
-		String subject = "balance";
+		String subject = TAG_BALANCE;
 		message.setSubject(subject);
 		message.setBody(balance);
 
-		Element tttalkNode = message.addChildElement("tttalk",
-				"http://jabber.org/protocol/tranlate");
+		Element tttalkNode = message.addChildElement(TAG_BALANCE,
+				TTTALK_NAMESPACE);
 
 		tttalkNode.addAttribute("balance", balance);
 
@@ -181,7 +185,7 @@ public class TranslatorPlugin implements Plugin {
 	}
 
 	public void story(String[] translators, String photo_id, String title,
-			String content) {
+			String content, String fullname, String pic_url) {
 		Message message = new Message();
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
@@ -189,12 +193,14 @@ public class TranslatorPlugin implements Plugin {
 		message.setSubject(subject);
 		message.setBody(content);
 
-		Element tttalkNode = message.addChildElement("tttalk",
-				"http://jabber.org/protocol/tranlate");
+		Element tttalkNode = message
+				.addChildElement("tttalk", TTTALK_NAMESPACE);
 
 		tttalkNode.addAttribute("photo_id", photo_id);
 		tttalkNode.addAttribute("title", title);
 		tttalkNode.addAttribute("content", content);
+		tttalkNode.addAttribute("fullname", fullname);
+		tttalkNode.addAttribute("pic_url", pic_url);
 
 		for (String v : translators) {
 			message.setTo(v);
@@ -204,19 +210,20 @@ public class TranslatorPlugin implements Plugin {
 	}
 
 	public void present(String translator, String present_id,
-			String present_name,
+			String to_user_photo_id, String fullname, String present_name,
 			String pic_url) {
 		Message message = new Message();
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
-		String subject = "present";
+		String subject = TAG_PRESENT;
 		message.setSubject(subject);
-		message.setBody(present_name);
 
-		Element tttalkNode = message.addChildElement("tttalk",
-				"http://jabber.org/protocol/tranlate");
+		Element tttalkNode = message.addChildElement(TAG_PRESENT,
+				TTTALK_NAMESPACE);
 
 		tttalkNode.addAttribute("present_id", present_id);
+		tttalkNode.addAttribute("to_user_photo_id", to_user_photo_id);
+		tttalkNode.addAttribute("fullname", fullname);
 		tttalkNode.addAttribute("present_name", present_name);
 		tttalkNode.addAttribute("pic_url", pic_url);
 
@@ -231,7 +238,7 @@ public class TranslatorPlugin implements Plugin {
 				+ server.getServerInfo().getXMPPDomain());
 		String subject = "delete";
 		message.setSubject(subject);
-		message.addChildElement("tttalk", "http://jabber.org/protocol/tranlate");
+		message.addChildElement("tttalk", TTTALK_NAMESPACE);
 
 		for (String v : translators) {
 			message.setTo(v);
