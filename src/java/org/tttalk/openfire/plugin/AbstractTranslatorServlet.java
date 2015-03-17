@@ -1,6 +1,7 @@
 package org.tttalk.openfire.plugin;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -39,6 +40,8 @@ public abstract class AbstractTranslatorServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+
+		logParameters(request);
 		doGet(request, response);
 	}
 
@@ -47,4 +50,15 @@ public abstract class AbstractTranslatorServlet extends HttpServlet {
 		super.destroy();
 	}
 
+	private void logParameters(HttpServletRequest request) {
+		Map<String, String[]> map = request.getParameterMap();
+		for (Map.Entry<String, String[]> entry : map.entrySet()) {
+			String values[] = entry.getValue();
+			String value = "";
+			for (String val : values) {
+				value += val + " ";
+			}
+			Log.info(String.format("[%s] = { %s}", entry.getKey(), value));
+		}
+	}
 }
