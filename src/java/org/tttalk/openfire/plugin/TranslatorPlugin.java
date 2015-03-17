@@ -33,6 +33,7 @@ public class TranslatorPlugin implements Plugin {
 	private static final String TAG_FRIEND = "friend";
 	private static final String TAG_PRESENT = "present";
 	private static final String TAG_STORY = "story";
+	private static final String TAG_OLD_VERSION_TRANSLATED = "old_version_translated";
 
 	private static final String TTTALK_USER_TRANSLATOR = "tttalk.user.translator";
 
@@ -242,6 +243,38 @@ public class TranslatorPlugin implements Plugin {
 		message.addChildElement("tttalk", TTTALK_NAMESPACE);
 
 		for (String v : translators) {
+			message.setTo(v);
+			log.info(message.toXML());
+			router.route(message);
+		}
+	}
+
+	public void oldVersionTranslated(String[] to_users, String message_id,
+			String userid, String from_lang, String to_lang, String file_path,
+			String file_type, String file_length, String from_content,
+			String to_content, String create_date) {
+		Message message = new Message();
+		message.setFrom(getTranslator() + "@"
+				+ server.getServerInfo().getXMPPDomain());
+		String subject = TAG_OLD_VERSION_TRANSLATED;
+		message.setSubject(subject);
+
+		Element tttalkNode = message.addChildElement(
+				TAG_OLD_VERSION_TRANSLATED, TTTALK_NAMESPACE);
+
+		tttalkNode.addAttribute("title", subject);
+		tttalkNode.addAttribute("message_id", message_id);
+		tttalkNode.addAttribute("userid", userid);
+		tttalkNode.addAttribute("from_lang", from_lang);
+		tttalkNode.addAttribute("to_lang", to_lang);
+		tttalkNode.addAttribute("file_path", file_path);
+		tttalkNode.addAttribute("file_type", file_type);
+		tttalkNode.addAttribute("file_length", file_length);
+		tttalkNode.addAttribute("from_content", from_content);
+		tttalkNode.addAttribute("to_content", to_content);
+		tttalkNode.addAttribute("create_date", create_date);
+
+		for (String v : to_users) {
 			message.setTo(v);
 			log.info(message.toXML());
 			router.route(message);

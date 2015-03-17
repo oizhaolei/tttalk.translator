@@ -100,6 +100,15 @@
         <servlet-name>DeleteServlet</servlet-name>
         <url-pattern>/delete</url-pattern>
     </servlet-mapping>
-    
 
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>OldVersionTranslatedServlet</servlet-name>
+        <servlet-class>org.tttalk.openfire.plugin.OldVersionTranslatedServlet</servlet-class>
+    </servlet>
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>OldVersionTranslatedServlet</servlet-name>
+        <url-pattern>/old_version_translated</url-pattern>
+    </servlet-mapping>
 </web-app>
