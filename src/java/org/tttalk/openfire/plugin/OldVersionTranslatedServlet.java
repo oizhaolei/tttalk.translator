@@ -34,6 +34,7 @@ public class OldVersionTranslatedServlet extends AbstractTranslatorServlet {
 		String to_content = request.getParameter("to_content");
 		String create_date = request.getParameter("create_date");
 		String[] to_users = request.getParameter("to_user").split(",");
+
 		plugin.oldVersionTranslated(to_users, message_id, userid, from_lang,
 				to_lang, file_path, file_type, file_length, from_content,
 				to_content, create_date);
@@ -44,6 +45,6 @@ public class OldVersionTranslatedServlet extends AbstractTranslatorServlet {
 
 	@Override
 	String getUri() {
-		return "/friend";
+		return "/old_version_translated";
 	}
 }

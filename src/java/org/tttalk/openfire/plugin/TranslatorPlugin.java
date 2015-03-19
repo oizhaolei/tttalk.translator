@@ -254,8 +254,8 @@ public class TranslatorPlugin implements Plugin {
 			String file_type, String file_length, String from_content,
 			String to_content, String create_date) {
 		Message message = new Message();
-		message.setFrom(getTranslator() + "@"
-				+ server.getServerInfo().getXMPPDomain());
+
+		message.setFrom(createXMPPuser(userid));
 		String subject = TAG_OLD_VERSION_TRANSLATED;
 		message.setSubject(subject);
 
@@ -279,5 +279,9 @@ public class TranslatorPlugin implements Plugin {
 			log.info(message.toXML());
 			router.route(message);
 		}
+	}
+
+	public String createXMPPuser(String userid) {
+		return "chinatalk_" + userid + "@tttalk.org/tttalk";
 	}
 }
