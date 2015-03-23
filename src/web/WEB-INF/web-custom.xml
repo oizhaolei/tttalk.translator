@@ -111,4 +111,15 @@
         <servlet-name>OldVersionTranslatedServlet</servlet-name>
         <url-pattern>/old_version_translated</url-pattern>
     </servlet-mapping>
+    
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>UpdateUserPwdServlet</servlet-name>
+        <servlet-class>org.tttalk.openfire.plugin.UpdateUserPwdServlet</servlet-class>
+    </servlet>
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>UpdateUserPwdServlet</servlet-name>
+        <url-pattern>/change_user_pwd</url-pattern>
+    </servlet-mapping>
 </web-app>
