@@ -1,6 +1,7 @@
 package org.tttalk.openfire.plugin;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -22,9 +23,12 @@ public class UpdateUserPwdServlet extends AbstractTranslatorServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		Log.info(request.toString());
 
-		String username = request.getParameter("user");// devicetoken
+		String jid = request.getParameter("user");// devicetoken
 		String newPwd = request.getParameter("new_pwd");
-		// TODO 更改用户密码
+		plugin.updateUserPwd(jid, newPwd);
+
+		PrintWriter out = response.getWriter();
+		out.println("success");
 	}
 
 	@Override
