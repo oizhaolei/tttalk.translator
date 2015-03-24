@@ -8,6 +8,9 @@ import org.jivesoftware.openfire.MessageRouter;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.user.User;
+import org.jivesoftware.openfire.user.UserManager;
+import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +45,12 @@ public class TranslatorPlugin implements Plugin {
 	}
 
 	private final XMPPServer server;
+	private UserManager userManager;
 
 	public TranslatorPlugin() {
 		server = XMPPServer.getInstance();
 		router = server.getMessageRouter();
+		userManager = UserManager.getInstance();
 	}
 
 	@Override
@@ -283,5 +288,20 @@ public class TranslatorPlugin implements Plugin {
 
 	public String createXMPPuser(String userid) {
 		return "chinatalk_" + userid + "@tttalk.org/tttalk";
+	}
+	public void updateUserPwd(String jid, String newPwd) {
+
+		String username = getUserName(jid);
+		try {
+			User user = userManager.getUser(username);
+			user.setPassword(newPwd);
+			log.info(String.format("updateUserPwd:%s,%s", username, newPwd));
+		} catch (UserNotFoundException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
+	private String getUserName(String jid) {
+		return jid.substring(0, jid.indexOf('@'));
 	}
 }
