@@ -92,12 +92,12 @@
 
     <!-- Servlets -->
     <servlet>
-        <servlet-name>DeleteServlet</servlet-name>
-        <servlet-class>org.tttalk.openfire.plugin.DeleteServlet</servlet-class>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <servlet-class>org.tttalk.openfire.plugin.DeleteUserServlet</servlet-class>
     </servlet>
     <!-- Servlet mappings -->
     <servlet-mapping>
-        <servlet-name>DeleteServlet</servlet-name>
+        <servlet-name>DeleteUserServlet</servlet-name>
         <url-pattern>/delete</url-pattern>
     </servlet-mapping>
 

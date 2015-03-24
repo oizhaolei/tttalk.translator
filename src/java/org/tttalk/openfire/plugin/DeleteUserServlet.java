@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 /**
  *
  */
-public class DeleteServlet extends AbstractTranslatorServlet {
+public class DeleteUserServlet extends AbstractTranslatorServlet {
 	private static final long serialVersionUID = 1159875340630997082L;
 	private static final Logger Log = LoggerFactory
-			.getLogger(DeleteServlet.class);
+			.getLogger(DeleteUserServlet.class);
 
 	@Override
 	protected void doGet(HttpServletRequest request,
