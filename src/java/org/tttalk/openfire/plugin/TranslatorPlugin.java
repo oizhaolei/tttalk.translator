@@ -66,7 +66,7 @@ public class TranslatorPlugin implements Plugin {
 	private final MessageRouter router;
 
 	public void translated(String messageId, String userId, String toContent,
-			int cost, int balance) {
+			String cost, String balance) {
 		Message message = new Message();
 		message.setTo(userId);
 		message.setFrom(getTranslator() + "@"
@@ -82,8 +82,8 @@ public class TranslatorPlugin implements Plugin {
 
 		tttalkNode.addAttribute("title", subject);
 		tttalkNode.addAttribute("message_id", messageId);
-		tttalkNode.addAttribute("cost", String.valueOf(cost));
-		tttalkNode.addAttribute("balance", String.valueOf(balance));
+		tttalkNode.addAttribute("cost", cost);
+		tttalkNode.addAttribute("balance", balance);
 
 		log.info(message.toXML());
 		router.route(message);
