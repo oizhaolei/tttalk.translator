@@ -1,14 +1,14 @@
 package org.tttalk.openfire.plugin;
 
 import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,7 +24,7 @@ public class BalanceServlet extends AbstractTranslatorServlet {
 		Log.info(request.toString());
 
 		String balance = request.getParameter("balance");
-		String translator = request.getParameter("translator");
+		String translator = request.getParameter("translators");
 		plugin.balance(translator, balance);
 
 		PrintWriter out = response.getWriter();
