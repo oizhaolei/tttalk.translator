@@ -19,7 +19,7 @@ import org.xmpp.packet.Message;
 /**
  * 1. Accept translate request, then call translate api.<br/>
  * 2. Present a callback interface, send result to a particular user.
- * 
+ *
  * @author zhaolei
  */
 public class TranslatorPlugin implements Plugin {
@@ -45,7 +45,7 @@ public class TranslatorPlugin implements Plugin {
 	}
 
 	private final XMPPServer server;
-	private UserManager userManager;
+	private final UserManager userManager;
 
 	public TranslatorPlugin() {
 		server = XMPPServer.getInstance();
@@ -173,7 +173,7 @@ public class TranslatorPlugin implements Plugin {
 		}
 	}
 
-	public void balance(String translator, String balance) {
+	public void balance(String translator, String balance, String body) {
 		Message message = new Message();
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
@@ -185,6 +185,10 @@ public class TranslatorPlugin implements Plugin {
 				TTTALK_NAMESPACE);
 
 		tttalkNode.addAttribute("balance", balance);
+		if (body != null && body.length() > 0)
+			tttalkNode.addAttribute("notify", "1");
+		else
+			tttalkNode.addAttribute("notify", "0");
 
 		message.setTo(translator);
 		log.info(message.toXML());
@@ -289,6 +293,7 @@ public class TranslatorPlugin implements Plugin {
 	public String createXMPPuser(String userid) {
 		return "chinatalk_" + userid + "@tttalk.org/tttalk";
 	}
+
 	public void updateUserPwd(String jid, String newPwd) {
 
 		String username = getUserName(jid);

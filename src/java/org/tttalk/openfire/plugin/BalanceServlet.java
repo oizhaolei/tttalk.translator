@@ -24,8 +24,9 @@ public class BalanceServlet extends AbstractTranslatorServlet {
 		Log.info(request.toString());
 
 		String balance = request.getParameter("balance");
+		String body = request.getParameter("body");
 		String translator = request.getParameter("translators");
-		plugin.balance(translator, balance);
+		plugin.balance(translator, balance, body);
 
 		PrintWriter out = response.getWriter();
 		out.println("success");
