@@ -10,4 +10,11 @@
     <date>01/30/2015</date>
     <minServerVersion>3.9.0</minServerVersion>
 
+    <adminconsole>
+      <tab id="tab-users">
+         <sidebar id="tttalk" name="TTTalk">
+            <item id="translator-form" name="TTTalk Translator" url="translator-form.jsp" description="Setting Url for translation" />
+         </sidebar>
+      </tab>
+   </adminconsole>
 </plugin>

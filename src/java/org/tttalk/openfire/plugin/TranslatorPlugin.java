@@ -53,8 +53,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final int AUTO_BAIDU = 2;
 	private static final int AUTO_MANUAL = 1;
 	private static final int AUTO_NONE = 0;
-	private static final String MANUAL_TRANSLATE_URL = "http://211.149.218.190:8080/litieshuai.api/message/message_request_translate.php";
-	private static final String BAIDU_TRANSLATE_URL = "http://211.149.218.190:8080/litieshuai.api/message/message_request_baidu_translate.php";
 
 	private static final String TTTALK_USER_TRANSLATOR = "tttalk.user.translator";
 	private final InterceptorManager interceptorManager;
@@ -344,13 +342,18 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				Element tttalk = msg.getChildElement(TAG_TTTALK,
 						TTTALK_NAMESPACE);
 				if (tttalk != null) {
+					String from_lang = tttalk.attributeValue("from_lang");
+					String to_lang = tttalk.attributeValue("to_lang");
+					String type = tttalk.attributeValue("type");
 					String auto_translate = tttalk
 							.attributeValue("auto_translate");
-					String type = tttalk.attributeValue("type");
+					if (from_lang != null && to_lang != null
+							&& CHAT_TYPE.equalsIgnoreCase(type)
+							&& auto_translate != null
+							&& !from_lang.equalsIgnoreCase(to_lang)) {
 
-					log.info(msg.toXML());
-					if (CHAT_TYPE.equalsIgnoreCase(type)
-							&& auto_translate != null) {
+						log.info(msg.toXML());
+
 						int mode = Integer.parseInt(auto_translate);
 						log.info(String.format("mode=%d", mode));
 						switch (mode) {
@@ -359,14 +362,13 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							break;
 						case AUTO_MANUAL:
 							log.info("AUTO_MANUAL START");
-							requestBaiduTranslate(msg);
+							requestManualTranslate(msg);
 							log.info("AUTO_MANUAL END");
 							break;
 						case AUTO_BAIDU:
 							log.info("AUTO_BAIDU");
 							requestBaiduTranslate(msg);
 							break;
-
 						}
 					}
 				}
@@ -385,26 +387,11 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	public void requestBaiduTranslate(Message msg) {
-		log.info("requestBaiduTranslate");
-
 		Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
 		tttalk.addAttribute("message_id",
 				String.valueOf(System.currentTimeMillis()));
-		String userid = getTTTalkId(msg.getTo());
-		String from_lang = tttalk.attributeValue("from_lang");
-		String to_lang = tttalk.attributeValue("to_lang");
 
-		final Map<String, String> postParams = new HashMap<String, String>();
-		postParams.put("userid", userid);
-		postParams.put("loginid", userid);
-		postParams.put("from_lang", from_lang);
-		postParams.put("to_lang", to_lang);
-		postParams.put("text", msg.getBody());
-
-		Utils.logParameters(postParams);
-		log.info("after add" + msg.toXML());
 		new Thread(new BaiduTranslateRunnable(msg), "Baidu").start();
-
 	}
 
 	public class BaiduTranslateRunnable implements Runnable {
@@ -427,7 +414,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			postParams.put("from_lang", tttalk.attributeValue("from_lang"));
 			postParams.put("to_lang", tttalk.attributeValue("to_lang"));
 			postParams.put("text", msg.getBody());
-			String response = Utils.post(BAIDU_TRANSLATE_URL, postParams);
+			String response = Utils.post(Utils.getBaiduTranslateUrl(),
+					postParams);
 			String to_content = parseBaiduResponse(response);
 
 			translated(message_id, msg.getTo().toString(), to_content, "0",
@@ -435,25 +423,45 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		}
 	}
 
-	public void requestManualTranslate(String message, String from_lang,
-			String to_lang, String filetype, String userid,
-			String content_length, String callback_id) {
+	public class ManualTranslateRunnable implements Runnable {
 
-		Map<String, String> postParams = new HashMap<String, String>();
+		private final Message msg;
 
-		postParams.put("userid", userid);
-		postParams.put("loginid", userid);
-		postParams.put("local_id", String.valueOf(System.currentTimeMillis()));
-		postParams.put("from_lang", from_lang);
-		postParams.put("to_lang", to_lang);
-		postParams.put("text", message);
-		postParams.put("filetype", "text");
-		postParams.put("content_length", content_length);
-		postParams.put("to_userid", String.valueOf(-1));
-		postParams.put("sign", userid);
+		public ManualTranslateRunnable(Message msg) {
+			this.msg = msg;
+		}
 
-		String response = Utils.post(MANUAL_TRANSLATE_URL, postParams);
-		String to_content = parseBaiduResponse(response);
+		@Override
+		public void run() {
+			Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
+			String userid = getTTTalkId(msg.getTo());
+
+			Map<String, String> postParams = new HashMap<String, String>();
+
+			postParams.put("userid", userid);
+			postParams.put("loginid", userid);
+			postParams.put("local_id",
+					String.valueOf(System.currentTimeMillis()));
+			postParams.put("from_lang", tttalk.attributeValue("from_lang"));
+			postParams.put("to_lang", tttalk.attributeValue("to_lang"));
+			postParams.put("text", msg.getBody());
+			postParams.put("filetype", tttalk.attributeValue("type"));
+			postParams.put("local_id", tttalk.attributeValue("message_id"));
+			postParams.put("content_length",
+					tttalk.attributeValue("content_length"));
+			postParams.put("to_userid", String.valueOf(-1));
+
+			Utils.post(Utils.getManualTranslateUrl(), postParams);
+
+		}
+	}
+
+	public void requestManualTranslate(Message msg) {
+		Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
+		tttalk.addAttribute("message_id",
+				String.valueOf(System.currentTimeMillis()));
+
+		new Thread(new ManualTranslateRunnable(msg), "Manual").start();
 
 	}
 
@@ -472,4 +480,19 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		return null;
 	}
 
+	public String getBaiduTranslateUrl() {
+		return Utils.getBaiduTranslateUrl();
+	}
+
+	public void setBaiduTranslateUrl(String url) {
+		Utils.setBaiduTranslateUrl(url);
+	}
+
+	public String getManualTranslateUrl() {
+		return Utils.getManualTranslateUrl();
+	}
+
+	public void setManualTranslateUrl(String url) {
+		Utils.setManualTranslateUrl(url);
+	}
 }

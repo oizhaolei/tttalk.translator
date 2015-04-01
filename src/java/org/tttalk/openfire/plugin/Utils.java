@@ -15,14 +15,15 @@ import com.github.kevinsawicki.http.HttpRequest;
 public class Utils {
 	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
-	private static final String TTTALK_DEVICE_URL = "tttalk.devicetoken.url";
+	private static final String BAIDU_TRANSLATE_URL = "tttalk.baidu.url";
+	private static final String MANUAL_TRANSLATE_URL = "tttalk.manual.url";
 	private static final String TTTALK_APP_SECRET = "tttalk.app.secret";
 
 	private static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5',
 			'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
 	private static String getSource() {
-		return "openfire";
+		return "iOS2.6.0";
 	}
 
 	public static String genSign(Map<String, String> params, String appkey) {
@@ -128,22 +129,30 @@ public class Utils {
 		return body;
 	}
 
-	public static void setDeviceTokenUrl(String url) {
-		JiveGlobals.setProperty(TTTALK_DEVICE_URL, url);
-	}
-
-	public static String getDeviceTokenUrl() {
-		return JiveGlobals.getProperty(TTTALK_DEVICE_URL,
-				"http://ctalk/tttalk.web/v3/openfire_devices.php");
-	}
-
-	public static void setAppSecret(String secret) {
-		JiveGlobals.setProperty(TTTALK_APP_SECRET, secret);
-	}
-
 	public static String getAppSecret() {
 		return JiveGlobals.getProperty(TTTALK_APP_SECRET,
 				"2a9304125e25edaa5aff574153eafc95c97672c6");
+	}
+
+	public static void setBaiduTranslateUrl(String url) {
+		JiveGlobals.setProperty(BAIDU_TRANSLATE_URL, url);
+	}
+
+	public static String getBaiduTranslateUrl() {
+		return JiveGlobals
+				.getProperty(
+						BAIDU_TRANSLATE_URL,
+						"http://app.tttalk.org/tttalk150214/message/message_request_baidu_translate.php");
+	}
+
+	public static void setManualTranslateUrl(String url) {
+		JiveGlobals.setProperty(MANUAL_TRANSLATE_URL, url);
+	}
+
+	public static String getManualTranslateUrl() {
+		return JiveGlobals
+				.getProperty(MANUAL_TRANSLATE_URL,
+						"http://app.tttalk.org/tttalk150214/message/message_request_translate.php");
 	}
 
 	public static String getClientId(String address) {
@@ -158,7 +167,7 @@ public class Utils {
 	public static void logParameters(Map<String, String> map) {
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			String value = entry.getValue();
-			log.info(String.format("[%s] = { %s}", entry.getKey(), value));
+			log.info(String.format("[%s] = {%s}", entry.getKey(), value));
 		}
 	}
 }
