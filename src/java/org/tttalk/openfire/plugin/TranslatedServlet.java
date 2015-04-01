@@ -28,7 +28,7 @@ public class TranslatedServlet extends AbstractTranslatorServlet {
 		String toContent = request.getParameter("to_content");
 		String cost = request.getParameter("cost");
 		String balance = request.getParameter("balance");
-		plugin.translated(messageId, user, toContent, cost, balance);
+		plugin.translated(messageId, user, toContent, cost, balance, "0");
 
 		PrintWriter out = response.getWriter();
 		out.println("success");
