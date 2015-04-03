@@ -87,7 +87,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private final MessageRouter router;
 
 	public void translated(String messageId, String userId, String toContent,
-			String cost, String balance, String auto_translate) {
+			String cost, String auto_translate) {
 		Message message = new Message();
 		message.setTo(userId);
 		message.setFrom(getTranslator() + "@"
@@ -104,7 +104,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		tttalkNode.addAttribute("title", subject);
 		tttalkNode.addAttribute("message_id", messageId);
 		tttalkNode.addAttribute("cost", cost);
-		tttalkNode.addAttribute("balance", balance);
 		tttalkNode.addAttribute("auto_translate", auto_translate);
 
 		log.info(message.toXML());
@@ -419,7 +418,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			String to_content = parseBaiduResponse(response);
 
 			translated(message_id, msg.getTo().toString(), to_content, "0",
-					"0", "1");
+					"1");
 		}
 	}
 
