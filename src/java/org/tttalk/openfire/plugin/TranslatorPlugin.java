@@ -67,7 +67,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 	private final XMPPServer server;
 	private final UserManager userManager;
-	private PresenceManager presenceManager;
+	private final PresenceManager presenceManager;
 
 	public TranslatorPlugin() {
 		server = XMPPServer.getInstance();
@@ -95,7 +95,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private final MessageRouter router;
-	private GearmanClient gearmanClient;
+	private final GearmanClient gearmanClient;
 
 	public void translated(String messageId, String userId, String toContent,
 			String cost, String auto_translate) {
@@ -147,6 +147,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			String file_type, String file_length, String from_content,
 			String to_content, String create_date) {
 		Message message = new Message();
+		message.setType(Message.Type.chat);
+		message.setID(userid);
 
 		message.setFrom(createXMPPuser(userid));
 		String subject = TAG_OLD_VERSION_TRANSLATED;
@@ -319,7 +321,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("to_content", to_content);
 		jo.put("create_date", create_date);
 		jo.put("pid", packetId);
-		jo.put("to_userid", to_userid);
+		jo.put("user_id", to_userid);
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
 		String uniqueId = null;
@@ -343,7 +345,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("cost", cost);
 		jo.put("pid", packetId);
 		jo.put("userid", fromTTTalkId);
-		jo.put("to_userid", toTTTalkId);
+		jo.put("user_id", toTTTalkId);
 		jo.put("body", body);
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
@@ -378,7 +380,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("message_id", message_id);
 		jo.put("pid", packetId);
 		jo.put("userid", fromTTTalkId);
-		jo.put("to_userid", toTTTalkId);
+		jo.put("user_id", toTTTalkId);
 		jo.put("body", body);
 		log.info("submitTTTalkJob: " + jo.toString());
 
