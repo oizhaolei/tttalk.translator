@@ -66,8 +66,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private final XMPPServer server;
 	private final UserManager userManager;
 	private PresenceManager presenceManager;
-	private String gearmanHost = "gearman";
-	private int gearmanPort = 4730;
 
 	public TranslatorPlugin() {
 		server = XMPPServer.getInstance();
@@ -77,8 +75,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		interceptorManager = InterceptorManager.getInstance();
 
 		gearmanClient = new GearmanClientImpl();
-		gearmanClient.addJobServer(new GearmanNIOJobServerConnection(
-				gearmanHost, gearmanPort));
+		gearmanClient.addJobServer(new GearmanNIOJobServerConnection(Utils
+				.getGearmanHost(), Utils.getGearmanPort()));
 
 	}
 
@@ -217,7 +215,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 						log.info(msg.toXML());
 
 						int mode = Integer.parseInt(auto_translate);
-						log.info(String.format("mode=%d", mode));
+						log.info(String.format("auto_translate=%d", mode));
 						switch (mode) {
 						case AUTO_NONE:
 							log.info("AUTO_NONE");
@@ -236,7 +234,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				}
 
 				// translated
-				// translating
 				// tttalk
 				// old_version_translated
 				JID toJID = msg.getTo();
@@ -254,16 +251,14 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 							if (tttalk != null) {
 								submitTTTalkJob(packetId, fromTTTalkId,
-										toTTTalkId, body,
-										tttalk);
+										toTTTalkId, body, tttalk);
 								return;
 							}
 							Element translated = msg.getChildElement(
 									TAG_TRANSLATED, TTTALK_NAMESPACE);
 							if (translated != null) {
 								submitTranslatedJob(packetId, fromTTTalkId,
-										toTTTalkId,
-										body, translated);
+										toTTTalkId, body, translated);
 								return;
 							}
 							Element oldVersion = msg.getChildElement(
@@ -276,16 +271,15 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							}
 						}
 					}
-
 				} catch (Exception e) {
+					log.error(e.getMessage(), e);
 				}
 			}
 		}
 	}
 
 	private void submitOldVersionJob(String packetId, String toTTTalkId,
-			Element oldVersion)
-			throws JSONException {
+			Element oldVersion) throws JSONException {
 		String function = "push_message";
 
 		String subject = oldVersion.attributeValue("title");
@@ -325,8 +319,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private void submitTranslatedJob(String packetId, String fromTTTalkId,
-			String toTTTalkId,
-			String body, Element translated) throws JSONException {
+			String toTTTalkId, String body, Element translated)
+			throws JSONException {
 		String function = "push_message";
 
 		String message_id = translated.attributeValue("message_id");
@@ -349,8 +343,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private void submitTTTalkJob(String packetId, String fromTTTalkId,
-			String toTTTalkId,
-			String body, Element tttalk) throws JSONException {
+			String toTTTalkId, String body, Element tttalk)
+			throws JSONException {
 		String function = "push_message";
 
 		String type = tttalk.attributeValue("type");
