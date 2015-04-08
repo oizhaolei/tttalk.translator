@@ -18,6 +18,8 @@ public class Utils {
 	private static final String BAIDU_TRANSLATE_URL = "tttalk.baidu.url";
 	private static final String MANUAL_TRANSLATE_URL = "tttalk.manual.url";
 	private static final String TTTALK_APP_SECRET = "tttalk.app.secret";
+	private static final String TTTALK_GEARMAN_HOST = "tttalk.gearman.host";
+	private static final String TTTALK_GEARMAN_PORT = "tttalk.gearman.prt";
 
 	private static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5',
 			'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
@@ -132,6 +134,14 @@ public class Utils {
 	public static String getAppSecret() {
 		return JiveGlobals.getProperty(TTTALK_APP_SECRET,
 				"2a9304125e25edaa5aff574153eafc95c97672c6");
+	}
+
+	public static String getGearmanHost() {
+		return JiveGlobals.getProperty(TTTALK_GEARMAN_HOST, "gearman");
+	}
+
+	public static int getGearmanPort() {
+		return JiveGlobals.getIntProperty(TTTALK_GEARMAN_PORT, 4730);
 	}
 
 	public static void setBaiduTranslateUrl(String url) {
