@@ -6,6 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dom4j.Element;
+import org.gearman.client.GearmanClient;
+import org.gearman.client.GearmanClientImpl;
+import org.gearman.client.GearmanJob;
+import org.gearman.client.GearmanJobImpl;
+import org.gearman.common.GearmanNIOJobServerConnection;
+import org.gearman.util.ByteUtils;
 import org.jivesoftware.openfire.MessageRouter;
 import org.jivesoftware.openfire.PresenceManager;
 import org.jivesoftware.openfire.XMPPServer;
@@ -60,6 +66,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private final XMPPServer server;
 	private final UserManager userManager;
 	private PresenceManager presenceManager;
+	private String gearmanHost = "gearman";
+	private int gearmanPort = 4730;
 
 	public TranslatorPlugin() {
 		server = XMPPServer.getInstance();
@@ -67,6 +75,10 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		presenceManager = server.getPresenceManager();
 		userManager = server.getUserManager();
 		interceptorManager = InterceptorManager.getInstance();
+
+		gearmanClient = new GearmanClientImpl();
+		gearmanClient.addJobServer(new GearmanNIOJobServerConnection(
+				gearmanHost, gearmanPort));
 
 	}
 
@@ -83,6 +95,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private final MessageRouter router;
+	private GearmanClient gearmanClient;
 
 	public void translated(String messageId, String userId, String toContent,
 			String cost, String auto_translate) {
@@ -234,14 +247,139 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 						Presence presence = presenceManager.getPresence(toUser);
 						if (!isOnline(presence)) {
 							// offline, send to other push
-							// TODO
+							String packetId = msg.getID();
+							String fromTTTalkId = getTTTalkId(msg.getFrom());
+							String toTTTalkId = getTTTalkId(msg.getTo());
+							String body = msg.getBody();
+
+							if (tttalk != null) {
+								submitTTTalkJob(packetId, fromTTTalkId,
+										toTTTalkId, body,
+										tttalk);
+								return;
+							}
+							Element translated = msg.getChildElement(
+									TAG_TRANSLATED, TTTALK_NAMESPACE);
+							if (translated != null) {
+								submitTranslatedJob(packetId, fromTTTalkId,
+										toTTTalkId,
+										body, translated);
+								return;
+							}
+							Element oldVersion = msg.getChildElement(
+									TAG_OLD_VERSION_TRANSLATED,
+									TTTALK_NAMESPACE);
+							if (oldVersion != null) {
+								submitOldVersionJob(packetId, toTTTalkId,
+										oldVersion);
+								return;
+							}
 						}
 					}
 
-				} catch (UserNotFoundException e) {
+				} catch (Exception e) {
 				}
 			}
 		}
+	}
+
+	private void submitOldVersionJob(String packetId, String toTTTalkId,
+			Element oldVersion)
+			throws JSONException {
+		String function = "push_message";
+
+		String subject = oldVersion.attributeValue("title");
+		String message_id = oldVersion.attributeValue("message_id");
+		String userid = oldVersion.attributeValue("userid");
+		String from_lang = oldVersion.attributeValue("from_lang");
+		String to_lang = oldVersion.attributeValue("to_lang");
+		String file_path = oldVersion.attributeValue("file_path");
+		String file_type = oldVersion.attributeValue("file_type");
+		String file_length = oldVersion.attributeValue("file_length");
+		String from_content = oldVersion.attributeValue("from_content");
+		String to_content = oldVersion.attributeValue("to_content");
+		String create_date = oldVersion.attributeValue("create_date");
+		String to_userid = toTTTalkId;
+
+		JSONObject jo = new JSONObject();
+		jo.put("title", TAG_OLD_VERSION_TRANSLATED);
+		jo.put("subject", subject);
+		jo.put("message_id", message_id);
+		jo.put("userid", userid);
+		jo.put("from_lang", from_lang);
+		jo.put("to_lang", to_lang);
+		jo.put("file_path", file_path);
+		jo.put("file_type", file_type);
+		jo.put("file_length", file_length);
+		jo.put("from_content", from_content);
+		jo.put("to_content", to_content);
+		jo.put("create_date", create_date);
+		jo.put("packet_id", packetId);
+		jo.put("to_userid", to_userid);
+
+		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
+		String uniqueId = null;
+		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
+				uniqueId);
+		gearmanClient.submit(job);
+	}
+
+	private void submitTranslatedJob(String packetId, String fromTTTalkId,
+			String toTTTalkId,
+			String body, Element translated) throws JSONException {
+		String function = "push_message";
+
+		String message_id = translated.attributeValue("message_id");
+		String cost = translated.attributeValue("cost");
+
+		JSONObject jo = new JSONObject();
+		jo.put("title", TAG_TRANSLATED);
+		jo.put("message_id", message_id);
+		jo.put("cost", cost);
+		jo.put("packet_id", packetId);
+		jo.put("userid", fromTTTalkId);
+		jo.put("to_userid", toTTTalkId);
+		jo.put("body", body);
+
+		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
+		String uniqueId = null;
+		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
+				uniqueId);
+		gearmanClient.submit(job);
+	}
+
+	private void submitTTTalkJob(String packetId, String fromTTTalkId,
+			String toTTTalkId,
+			String body, Element tttalk) throws JSONException {
+		String function = "push_message";
+
+		String type = tttalk.attributeValue("type");
+		String file_path = tttalk.attributeValue("file_path");
+		String content_length = tttalk.attributeValue("content_length");
+		String from_lang = tttalk.attributeValue("from_lang");
+		String to_lang = tttalk.attributeValue("to_lang");
+		String auto_translate = tttalk.attributeValue("auto_translate");
+		String message_id = tttalk.attributeValue("message_id");
+
+		JSONObject jo = new JSONObject();
+		jo.put("title", TAG_TTTALK);
+		jo.put("type", type);
+		jo.put("file_path", file_path);
+		jo.put("content_length", content_length);
+		jo.put("from_lang", from_lang);
+		jo.put("to_lang", to_lang);
+		jo.put("auto_translate", auto_translate);
+		jo.put("message_id", message_id);
+		jo.put("packet_id", packetId);
+		jo.put("userid", fromTTTalkId);
+		jo.put("to_userid", toTTTalkId);
+		jo.put("body", body);
+
+		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
+		String uniqueId = null;
+		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
+				uniqueId);
+		gearmanClient.submit(job);
 	}
 
 	private boolean isOnline(Presence presence) {
