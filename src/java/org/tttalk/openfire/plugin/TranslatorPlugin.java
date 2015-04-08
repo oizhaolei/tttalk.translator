@@ -45,6 +45,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			.getLogger(TranslatorPlugin.class);
 	public static final String PLUGIN_NAME = "tttalk.translator";
 
+	private static final String APP_NAME = "chinatalk";
+
 	private static final String TTTALK_NAMESPACE = "http://tttalk.org/protocol/tttalk";
 	private static final String TAG_TRANSLATED = "translated";
 	private static final String TAG_TRANSLATING = "translating";
@@ -238,39 +240,46 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				// old_version_translated
 				JID toJID = msg.getTo();
 				User toUser;
+				log.info("toJID: " + toJID);
+				log.info("msg: " + msg.toXML());
+
 				try {
 					toUser = userManager.getUser(getUsername(toJID));
-					if (presenceManager.isAvailable(toUser)) {
-						Presence presence = presenceManager.getPresence(toUser);
-						if (!isOnline(presence)) {
-							// offline, send to other push
-							String packetId = msg.getID();
-							String fromTTTalkId = getTTTalkId(msg.getFrom());
-							String toTTTalkId = getTTTalkId(msg.getTo());
-							String body = msg.getBody();
+					log.info("isOnline: " + isOnline(toUser));
+					if (!isOnline(toUser)) {
+						// offline, send to other push
+						String packetId = msg.getID();
+						String fromTTTalkId = getTTTalkId(msg.getFrom());
+						String toTTTalkId = getTTTalkId(msg.getTo());
+						String body = msg.getBody();
 
-							if (tttalk != null) {
-								submitTTTalkJob(packetId, fromTTTalkId,
-										toTTTalkId, body, tttalk);
-								return;
-							}
-							Element translated = msg.getChildElement(
-									TAG_TRANSLATED, TTTALK_NAMESPACE);
-							if (translated != null) {
-								submitTranslatedJob(packetId, fromTTTalkId,
-										toTTTalkId, body, translated);
-								return;
-							}
-							Element oldVersion = msg.getChildElement(
-									TAG_OLD_VERSION_TRANSLATED,
-									TTTALK_NAMESPACE);
-							if (oldVersion != null) {
-								submitOldVersionJob(packetId, toTTTalkId,
-										oldVersion);
-								return;
-							}
+						if (tttalk != null) {
+							log.info("submitTTTalkJob");
+
+							submitTTTalkJob(packetId, fromTTTalkId, toTTTalkId,
+									body, tttalk);
+							return;
 						}
+						Element translated = msg.getChildElement(
+								TAG_TRANSLATED, TTTALK_NAMESPACE);
+						if (translated != null) {
+							log.info("submitTranslatedJob");
+							submitTranslatedJob(packetId, fromTTTalkId,
+									toTTTalkId, body, translated);
+							return;
+						}
+						Element oldVersion = msg.getChildElement(
+								TAG_OLD_VERSION_TRANSLATED, TTTALK_NAMESPACE);
+						if (oldVersion != null) {
+							log.info("submitOldVersionJob");
+							submitOldVersionJob(packetId, toTTTalkId,
+									oldVersion);
+							return;
+						}
+
+						log.info("nothing");
 					}
+
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
@@ -296,6 +305,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String to_userid = toTTTalkId;
 
 		JSONObject jo = new JSONObject();
+		jo.put("app_name", APP_NAME);
 		jo.put("title", TAG_OLD_VERSION_TRANSLATED);
 		jo.put("subject", subject);
 		jo.put("message_id", message_id);
@@ -327,6 +337,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String cost = translated.attributeValue("cost");
 
 		JSONObject jo = new JSONObject();
+		jo.put("app_name", APP_NAME);
 		jo.put("title", TAG_TRANSLATED);
 		jo.put("message_id", message_id);
 		jo.put("cost", cost);
@@ -356,6 +367,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String message_id = tttalk.attributeValue("message_id");
 
 		JSONObject jo = new JSONObject();
+		jo.put("app_name", APP_NAME);
 		jo.put("title", TAG_TTTALK);
 		jo.put("type", type);
 		jo.put("file_path", file_path);
@@ -368,6 +380,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("userid", fromTTTalkId);
 		jo.put("to_userid", toTTTalkId);
 		jo.put("body", body);
+		log.info("submitTTTalkJob: " + jo.toString());
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
 		String uniqueId = null;
@@ -376,7 +389,12 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		gearmanClient.submit(job);
 	}
 
-	private boolean isOnline(Presence presence) {
+	private boolean isOnline(User user) {
+		if (!presenceManager.isAvailable(user)) {
+			return false;
+		}
+		Presence presence = presenceManager.getPresence(user);
+
 		return (presence.getShow() == null
 				|| presence.getShow() == Presence.Show.chat
 				|| presence.getShow() == Presence.Show.away

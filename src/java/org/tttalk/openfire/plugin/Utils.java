@@ -137,7 +137,7 @@ public class Utils {
 	}
 
 	public static String getGearmanHost() {
-		return JiveGlobals.getProperty(TTTALK_GEARMAN_HOST, "gearman");
+		return JiveGlobals.getProperty(TTTALK_GEARMAN_HOST, "115.68.24.72");
 	}
 
 	public static int getGearmanPort() {
