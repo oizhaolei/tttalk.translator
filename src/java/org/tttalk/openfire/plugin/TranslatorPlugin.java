@@ -308,7 +308,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("from_content", from_content);
 		jo.put("to_content", to_content);
 		jo.put("create_date", create_date);
-		jo.put("packet_id", packetId);
+		jo.put("pid", packetId);
 		jo.put("to_userid", to_userid);
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
@@ -330,7 +330,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("title", TAG_TRANSLATED);
 		jo.put("message_id", message_id);
 		jo.put("cost", cost);
-		jo.put("packet_id", packetId);
+		jo.put("pid", packetId);
 		jo.put("userid", fromTTTalkId);
 		jo.put("to_userid", toTTTalkId);
 		jo.put("body", body);
@@ -364,7 +364,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("to_lang", to_lang);
 		jo.put("auto_translate", auto_translate);
 		jo.put("message_id", message_id);
-		jo.put("packet_id", packetId);
+		jo.put("pid", packetId);
 		jo.put("userid", fromTTTalkId);
 		jo.put("to_userid", toTTTalkId);
 		jo.put("body", body);
