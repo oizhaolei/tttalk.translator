@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.dom4j.Element;
 import org.jivesoftware.openfire.MessageRouter;
+import org.jivesoftware.openfire.PresenceManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
 import org.xmpp.packet.Packet;
+import org.xmpp.packet.Presence;
 
 /**
  * 1. Accept translate request, then call translate api.<br/>
@@ -57,11 +59,13 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 	private final XMPPServer server;
 	private final UserManager userManager;
+	private PresenceManager presenceManager;
 
 	public TranslatorPlugin() {
 		server = XMPPServer.getInstance();
 		router = server.getMessageRouter();
-		userManager = UserManager.getInstance();
+		presenceManager = server.getPresenceManager();
+		userManager = server.getUserManager();
 		interceptorManager = InterceptorManager.getInstance();
 
 	}
@@ -217,8 +221,40 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 						}
 					}
 				}
+
+				// translated
+				// translating
+				// tttalk
+				// old_version_translated
+				JID toJID = msg.getTo();
+				User toUser;
+				try {
+					toUser = userManager.getUser(getUsername(toJID));
+					if (presenceManager.isAvailable(toUser)) {
+						Presence presence = presenceManager.getPresence(toUser);
+						if (!isOnline(presence)) {
+							// offline, send to other push
+							// TODO
+						}
+					}
+
+				} catch (UserNotFoundException e) {
+				}
 			}
 		}
+	}
+
+	private boolean isOnline(Presence presence) {
+		return (presence.getShow() == null
+				|| presence.getShow() == Presence.Show.chat
+				|| presence.getShow() == Presence.Show.away
+				|| presence.getShow() == Presence.Show.xa || presence.getShow() == Presence.Show.dnd);
+	}
+
+	private String getUsername(JID toJID) {
+		String full = toJID.toString();
+		String username = full.substring(0, full.indexOf("@"));
+		return username;
 	}
 
 	private String getTTTalkId(JID jid) {
@@ -263,8 +299,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					postParams);
 			String to_content = parseBaiduResponse(response);
 
-			translated(message_id, msg.getTo().toString(), to_content, "0",
-					"1");
+			translated(message_id, msg.getTo().toString(), to_content, "0", "1");
 		}
 	}
 
@@ -307,7 +342,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				String.valueOf(System.currentTimeMillis()));
 
 		new Thread(new ManualTranslateRunnable(msg), "Manual").start();
-
 	}
 
 	private String parseBaiduResponse(String body) {
@@ -319,8 +353,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				return data.getString("to_content");
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return null;
 	}
