@@ -176,9 +176,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		return "chinatalk_" + userid + "@tttalk.org/tttalk";
 	}
 
-	public void updateUserPwd(String jid, String newPwd) {
+	public void updateUserPwd(String username, String newPwd) {
 
-		String username = getUserName(jid);
 		try {
 			User user = userManager.getUser(username);
 			user.setPassword(newPwd);
@@ -186,10 +185,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		} catch (UserNotFoundException e) {
 			log.error(username, e);
 		}
-	}
-
-	private String getUserName(String jid) {
-		return jid.substring(0, jid.indexOf('@'));
 	}
 
 	@Override
@@ -269,10 +264,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 						return;
 					}
 
-				} catch (UserNotFoundException e) {
-					log.error(toJID.toString(), e);
 				} catch (Exception e) {
-					log.error(toJID.toString(), e);
+					log.error(e.getMessage(), e);
 				}
 			}
 		}

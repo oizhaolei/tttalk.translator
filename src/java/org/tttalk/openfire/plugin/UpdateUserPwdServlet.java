@@ -23,9 +23,9 @@ public class UpdateUserPwdServlet extends AbstractTranslatorServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		Log.info(request.toString());
 
-		String jid = request.getParameter("user");// devicetoken
+		String username = request.getParameter("user");// devicetoken
 		String newPwd = request.getParameter("new_pwd");
-		plugin.updateUserPwd(jid, newPwd);
+		plugin.updateUserPwd(username, newPwd);
 
 		PrintWriter out = response.getWriter();
 		out.println("success");
