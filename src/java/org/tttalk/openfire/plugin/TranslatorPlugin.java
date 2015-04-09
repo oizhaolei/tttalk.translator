@@ -279,6 +279,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String from_content = oldVersion.attributeValue("from_content");
 		String to_content = oldVersion.attributeValue("to_content");
 		String userid = oldVersion.attributeValue("userid");
+		String to_lang = oldVersion.attributeValue("to_lang");
 		String to_userid = toTTTalkId;
 
 		JSONObject jo = new JSONObject();
@@ -288,6 +289,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("file_type", file_type);
 		jo.put("from_content", from_content);
 		jo.put("to_content", to_content);
+		jo.put("to_lang", to_lang);
 		jo.put("user_id", to_userid);
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
@@ -322,6 +324,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String function = "push_message";
 
 		String type = tttalk.attributeValue("type");
+		String to_lang = tttalk.attributeValue("to_lang");
 
 		JSONObject jo = new JSONObject();
 		jo.put("app_name", APP_NAME);
@@ -330,6 +333,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("userid", fromTTTalkId);
 		jo.put("user_id", toTTTalkId);
 		jo.put("body", body);
+		jo.put("to_lang", to_lang);
 		log.info("submitTTTalkJob: " + jo.toString());
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
