@@ -283,10 +283,12 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String file_type = oldVersion.attributeValue("file_type");
 		String from_content = oldVersion.attributeValue("from_content");
 		String to_content = oldVersion.attributeValue("to_content");
+		String userid = oldVersion.attributeValue("userid");
 		String to_userid = toTTTalkId;
 
 		JSONObject jo = new JSONObject();
 		jo.put("app_name", APP_NAME);
+		jo.put("userid", userid);
 		jo.put("title", TAG_OLD_VERSION_TRANSLATED);
 		jo.put("file_type", file_type);
 		jo.put("from_content", from_content);
