@@ -188,7 +188,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			user.setPassword(newPwd);
 			log.info(String.format("updateUserPwd:%s,%s", username, newPwd));
 		} catch (UserNotFoundException e) {
-			log.error(e.getMessage(), e);
+			log.error(username, e);
 		}
 	}
 
@@ -282,8 +282,10 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 						log.info("nothing");
 					}
 
+				} catch (UserNotFoundException e) {
+					log.error(toJID.toString(), e);
 				} catch (Exception e) {
-					log.error(e.getMessage(), e);
+					log.error(toJID.toString(), e);
 				}
 			}
 		}
