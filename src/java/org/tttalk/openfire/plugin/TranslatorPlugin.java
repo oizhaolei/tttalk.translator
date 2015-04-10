@@ -204,41 +204,36 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					String type = tttalk.attributeValue("type");
 					// String auto_translate = tttalk
 					// .attributeValue("auto_translate");
-					String auto_translate = null;
-					try {
-						auto_translate = getProperty(
-								getTTTalkTranslator(msg.getTo()),
-								getTTTalkTranslator(msg.getFrom())
-										+ "_auto_translate");
-					} catch (UserNotFoundException e) {
-						e.printStackTrace();
-					}
-					if (Utils.isEmpty(auto_translate)) {
-						auto_translate = String.valueOf(AUTO_NONE);
-					}
-
+					log.info(msg.toXML());
 					if (from_lang != null && to_lang != null
 							&& CHAT_TYPE_TEXT.equalsIgnoreCase(type)
-							&& auto_translate != null
 							&& !from_lang.equalsIgnoreCase(to_lang)) {
-
-						log.info(msg.toXML());
-
-						int mode = Integer.parseInt(auto_translate);
-						log.info(String.format("auto_translate=%d", mode));
-						switch (mode) {
-						case AUTO_NONE:
-							log.info("AUTO_NONE");
-							break;
-						case AUTO_MANUAL:
-							log.info("AUTO_MANUAL START");
-							requestManualTranslate(msg);
-							log.info("AUTO_MANUAL END");
-							break;
-						case AUTO_BAIDU:
-							log.info("AUTO_BAIDU");
-							requestBaiduTranslate(msg);
-							break;
+						String auto_translate = null;
+						try {
+							auto_translate = getProperty(
+									getTTTalkTranslator(msg.getTo()),
+									getTTTalkTranslator(msg.getFrom())
+											+ "_auto_translate");
+						} catch (UserNotFoundException e) {
+							e.printStackTrace();
+						}
+						if (auto_translate != null) {
+							int mode = Integer.parseInt(auto_translate);
+							log.info(String.format("auto_translate=%d", mode));
+							switch (mode) {
+							case AUTO_NONE:
+								log.info("AUTO_NONE");
+								break;
+							case AUTO_MANUAL:
+								log.info("AUTO_MANUAL START");
+								requestManualTranslate(msg);
+								log.info("AUTO_MANUAL END");
+								break;
+							case AUTO_BAIDU:
+								log.info("AUTO_BAIDU");
+								requestBaiduTranslate(msg);
+								break;
+							}
 						}
 					}
 				}
