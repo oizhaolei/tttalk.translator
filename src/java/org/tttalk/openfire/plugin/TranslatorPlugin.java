@@ -469,4 +469,18 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	public void setManualTranslateUrl(String url) {
 		Utils.setManualTranslateUrl(url);
 	}
+
+	public String getProperty(String username, String key)
+			throws UserNotFoundException {
+		User user = userManager.getUser(username);
+		if (key == null)
+			return user.getProperties().toString();
+		return user.getProperties().get(key);
+	}
+
+	public void updateProperty(String username, String key, String value)
+			throws UserNotFoundException {
+		User user = userManager.getUser(username);
+		user.getProperties().put(key, value);
+	}
 }

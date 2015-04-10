@@ -23,7 +23,7 @@ public class UpdateUserPwdServlet extends AbstractTranslatorServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		Log.info(request.toString());
 
-		String username = request.getParameter("user");// devicetoken
+		String username = request.getParameter("user");
 		String newPwd = request.getParameter("new_pwd");
 		plugin.updateUserPwd(username, newPwd);
 

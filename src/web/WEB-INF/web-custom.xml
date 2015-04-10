@@ -45,4 +45,15 @@
         <servlet-name>UpdateUserPwdServlet</servlet-name>
         <url-pattern>/change_user_pwd</url-pattern>
     </servlet-mapping>
+    
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>UserProperyServlet</servlet-name>
+        <servlet-class>org.tttalk.openfire.plugin.UserProperyServlet</servlet-class>
+    </servlet>
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>UserProperyServlet</servlet-name>
+        <url-pattern>/userproperties</url-pattern>
+    </servlet-mapping>
 </web-app>
