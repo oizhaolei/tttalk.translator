@@ -51,7 +51,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final String TAG_TTTALK = "tttalk";
 	private static final String TAG_OLD_VERSION_TRANSLATED = "old_version_translated";
 
-	private static final String CHAT_TYPE = "text";
+	private static final String CHAT_TYPE_TEXT = "text";
 	private static final int AUTO_BAIDU = 2;
 	private static final int AUTO_MANUAL = 1;
 	private static final int AUTO_NONE = 0;
@@ -205,7 +205,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					String auto_translate = tttalk
 							.attributeValue("auto_translate");
 					if (from_lang != null && to_lang != null
-							&& CHAT_TYPE.equalsIgnoreCase(type)
+							&& CHAT_TYPE_TEXT.equalsIgnoreCase(type)
 							&& auto_translate != null
 							&& !from_lang.equalsIgnoreCase(to_lang)) {
 
