@@ -93,7 +93,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 	private final MessageRouter router;
 	private final GearmanClient gearmanClient;
-	private GearmanNIOJobServerConnection gearmanConnection;
+	private final GearmanNIOJobServerConnection gearmanConnection;
 
 	public void translated(String messageId, String userId, String toContent,
 			String cost, String auto_translate) {
@@ -202,8 +202,21 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					String from_lang = tttalk.attributeValue("from_lang");
 					String to_lang = tttalk.attributeValue("to_lang");
 					String type = tttalk.attributeValue("type");
-					String auto_translate = tttalk
-							.attributeValue("auto_translate");
+					// String auto_translate = tttalk
+					// .attributeValue("auto_translate");
+					String auto_translate = null;
+					try {
+						auto_translate = getProperty(
+								getTTTalkTranslator(msg.getTo()),
+								getTTTalkTranslator(msg.getFrom())
+										+ "_auto_translate");
+					} catch (UserNotFoundException e) {
+						e.printStackTrace();
+					}
+					if (Utils.isEmpty(auto_translate)) {
+						auto_translate = String.valueOf(AUTO_NONE);
+					}
+
 					if (from_lang != null && to_lang != null
 							&& CHAT_TYPE_TEXT.equalsIgnoreCase(type)
 							&& auto_translate != null
@@ -361,6 +374,11 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			tttalkId = temp.substring("chinatalk_".length(), temp.indexOf("@"));
 		}
 		return tttalkId;
+	}
+
+	private String getTTTalkTranslator(JID jid) {
+		String temp = jid.toString();
+		return temp.substring(0, temp.indexOf("@"));
 	}
 
 	public void requestBaiduTranslate(Message msg) {
