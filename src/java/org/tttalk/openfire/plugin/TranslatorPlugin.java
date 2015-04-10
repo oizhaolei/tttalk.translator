@@ -73,8 +73,9 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		interceptorManager = InterceptorManager.getInstance();
 
 		gearmanClient = new GearmanClientImpl();
-		gearmanClient.addJobServer(new GearmanNIOJobServerConnection(Utils
-				.getGearmanHost(), Utils.getGearmanPort()));
+		gearmanConnection = new GearmanNIOJobServerConnection(
+				Utils.getGearmanHost(), Utils.getGearmanPort());
+		gearmanClient.addJobServer(gearmanConnection);
 
 	}
 
@@ -92,6 +93,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 	private final MessageRouter router;
 	private final GearmanClient gearmanClient;
+	private GearmanNIOJobServerConnection gearmanConnection;
 
 	public void translated(String messageId, String userId, String toContent,
 			String cost, String auto_translate) {
@@ -272,7 +274,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private void submitOldVersionJob(String packetId, String toTTTalkId,
-			Element oldVersion) throws JSONException {
+			Element oldVersion) throws Exception {
 		String function = "push_message";
 
 		String file_type = oldVersion.attributeValue("file_type");
@@ -296,12 +298,15 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String uniqueId = null;
 		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
 				uniqueId);
+		if (!gearmanConnection.isOpen()) {
+			gearmanConnection.open();
+		}
 		gearmanClient.submit(job);
 	}
 
 	private void submitTranslatedJob(String packetId, String fromTTTalkId,
 			String toTTTalkId, String body, Element translated)
-			throws JSONException {
+			throws Exception {
 		String function = "push_message";
 
 		JSONObject jo = new JSONObject();
@@ -315,12 +320,14 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String uniqueId = null;
 		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
 				uniqueId);
+		if (!gearmanConnection.isOpen()) {
+			gearmanConnection.open();
+		}
 		gearmanClient.submit(job);
 	}
 
 	private void submitTTTalkJob(String packetId, String fromTTTalkId,
-			String toTTTalkId, String body, Element tttalk)
-			throws JSONException {
+			String toTTTalkId, String body, Element tttalk) throws Exception {
 		String function = "push_message";
 
 		String type = tttalk.attributeValue("type");
@@ -340,6 +347,9 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String uniqueId = null;
 		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
 				uniqueId);
+		if (!gearmanConnection.isOpen()) {
+			gearmanConnection.open();
+		}
 		gearmanClient.submit(job);
 	}
 
