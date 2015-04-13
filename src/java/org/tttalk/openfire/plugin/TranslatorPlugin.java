@@ -349,6 +349,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("user_id", toTTTalkId);
 		jo.put("body", body);
 		jo.put("to_lang", to_lang);
+		jo.put("pid", packetId);
 		log.info("submitTTTalkJob: " + jo.toString());
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
