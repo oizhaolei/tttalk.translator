@@ -247,7 +247,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				 * 百度推送，apns推送通知
 				 */
 
-				// translated
 				// tttalk
 				// old_version_translated
 				try {
@@ -261,14 +260,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 						submitTTTalkJob(packetId, fromTTTalkId, toTTTalkId,
 								body, tttalk);
-						return;
-					}
-					Element translated = msg.getChildElement(TAG_TRANSLATED,
-							TTTALK_NAMESPACE);
-					if (translated != null) {
-						log.info("submitTranslatedJob");
-						submitTranslatedJob(packetId, fromTTTalkId, toTTTalkId,
-								body, translated);
 						return;
 					}
 					Element oldVersion = msg.getChildElement(
@@ -306,23 +297,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		jo.put("to_content", to_content);
 		jo.put("to_lang", to_lang);
 		jo.put("user_id", to_userid);
-
-		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
-		String uniqueId = null;
-		createBackgroundJob(function, data, uniqueId);
-	}
-
-	private void submitTranslatedJob(String packetId, String fromTTTalkId,
-			String toTTTalkId, String body, Element translated)
-			throws Exception {
-		String function = "push_message";
-
-		JSONObject jo = new JSONObject();
-		jo.put("app_name", APP_NAME);
-		jo.put("title", TAG_TRANSLATED);
-		jo.put("userid", fromTTTalkId);
-		jo.put("user_id", toTTTalkId);
-		jo.put("body", body);
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
 		String uniqueId = null;
