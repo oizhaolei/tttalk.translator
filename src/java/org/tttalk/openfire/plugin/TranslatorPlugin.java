@@ -2,6 +2,7 @@ package org.tttalk.openfire.plugin;
 
 //import java.io.File;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,11 +73,16 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		userManager = server.getUserManager();
 		interceptorManager = InterceptorManager.getInstance();
 
-		gearmanClient = new GearmanClientImpl();
-		gearmanConnection = new GearmanNIOJobServerConnection(
+		gearmanClient = genGearmanClient();
+
+	}
+
+	private GearmanClient genGearmanClient() {
+		GearmanClientImpl gearmanClient = new GearmanClientImpl();
+		GearmanNIOJobServerConnection gearmanConnection = new GearmanNIOJobServerConnection(
 				Utils.getGearmanHost(), Utils.getGearmanPort());
 		gearmanClient.addJobServer(gearmanConnection);
-
+		return gearmanClient;
 	}
 
 	@Override
@@ -92,8 +98,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private final MessageRouter router;
-	private final GearmanClient gearmanClient;
-	private final GearmanNIOJobServerConnection gearmanConnection;
+	private GearmanClient gearmanClient;
 
 	public void translated(String messageId, String userId, String toContent,
 			String cost, String auto_translate) {
@@ -209,13 +214,13 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							&& CHAT_TYPE_TEXT.equalsIgnoreCase(type)
 							&& !from_lang.equalsIgnoreCase(to_lang)) {
 						String auto_translate = null;
+						String username = getUsernameFromJID(msg.getTo());
 						try {
-							auto_translate = getProperty(
-									getTTTalkTranslator(msg.getTo()),
-									getTTTalkTranslator(msg.getFrom())
+							auto_translate = getProperty(username,
+									getUsernameFromJID(msg.getFrom())
 											+ "_auto_translate");
 						} catch (UserNotFoundException e) {
-							e.printStackTrace();
+							log.error(username, e);
 						}
 						if (auto_translate != null) {
 							int mode = Integer.parseInt(auto_translate);
@@ -304,12 +309,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
 		String uniqueId = null;
-		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
-				uniqueId);
-		if (!gearmanConnection.isOpen()) {
-			gearmanConnection.open();
-		}
-		gearmanClient.submit(job);
+		createBackgroundJob(function, data, uniqueId);
 	}
 
 	private void submitTranslatedJob(String packetId, String fromTTTalkId,
@@ -326,12 +326,21 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
 		String uniqueId = null;
+		createBackgroundJob(function, data, uniqueId);
+	}
+
+	private void createBackgroundJob(String function, byte[] data,
+			String uniqueId)
+			throws IOException {
 		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
 				uniqueId);
-		if (!gearmanConnection.isOpen()) {
-			gearmanConnection.open();
+		try {
+			gearmanClient.submit(job);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			gearmanClient = genGearmanClient();
+			gearmanClient.submit(job);
 		}
-		gearmanClient.submit(job);
 	}
 
 	private void submitTTTalkJob(String packetId, String fromTTTalkId,
@@ -354,12 +363,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		byte[] data = ByteUtils.toUTF8Bytes(jo.toString());
 		String uniqueId = null;
-		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
-				uniqueId);
-		if (!gearmanConnection.isOpen()) {
-			gearmanConnection.open();
-		}
-		gearmanClient.submit(job);
+		createBackgroundJob(function, data, uniqueId);
 	}
 
 	private String getTTTalkId(JID jid) {
@@ -372,7 +376,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		return tttalkId;
 	}
 
-	private String getTTTalkTranslator(JID jid) {
+	private String getUsernameFromJID(JID jid) {
 		String temp = jid.toString();
 		return temp.substring(0, temp.indexOf("@"));
 	}
