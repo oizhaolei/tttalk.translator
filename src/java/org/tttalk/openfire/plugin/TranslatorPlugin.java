@@ -227,14 +227,18 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							log.info(String.format("auto_translate=%d", mode));
 							switch (mode) {
 							case AUTO_NONE:
+								tttalk.addAttribute("auto_translate", "0");
 								log.info("AUTO_NONE");
 								break;
 							case AUTO_MANUAL:
+								tttalk.addAttribute("auto_translate", "1");
 								log.info("AUTO_MANUAL START");
 								requestManualTranslate(msg);
 								log.info("AUTO_MANUAL END");
 								break;
 							case AUTO_BAIDU:
+								tttalk.addAttribute("auto_translate", "2");
+
 								log.info("AUTO_BAIDU");
 								requestBaiduTranslate(msg);
 								break;
@@ -304,8 +308,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private void createBackgroundJob(String function, byte[] data,
-			String uniqueId)
-			throws IOException {
+			String uniqueId) throws IOException {
 		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
 				uniqueId);
 		try {
@@ -373,6 +376,12 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		@Override
 		public void run() {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
 			String userid = getTTTalkId(msg.getTo());
 			String message_id = tttalk.attributeValue("message_id");
