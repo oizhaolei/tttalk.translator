@@ -223,21 +223,20 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							log.error(username, e);
 						}
 						if (auto_translate != null) {
+							tttalk.addAttribute("auto_translate",
+									auto_translate);
 							int mode = Integer.parseInt(auto_translate);
 							log.info(String.format("auto_translate=%d", mode));
 							switch (mode) {
 							case AUTO_NONE:
-								tttalk.addAttribute("auto_translate", "0");
 								log.info("AUTO_NONE");
 								break;
 							case AUTO_MANUAL:
-								tttalk.addAttribute("auto_translate", "1");
 								log.info("AUTO_MANUAL START");
 								requestManualTranslate(msg);
 								log.info("AUTO_MANUAL END");
 								break;
 							case AUTO_BAIDU:
-								tttalk.addAttribute("auto_translate", "2");
 
 								log.info("AUTO_BAIDU");
 								requestBaiduTranslate(msg);
@@ -376,12 +375,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		@Override
 		public void run() {
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
 			String userid = getTTTalkId(msg.getTo());
 			String message_id = tttalk.attributeValue("message_id");
