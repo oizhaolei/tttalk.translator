@@ -224,6 +224,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							auto_translate = String.valueOf(AUTO_MANUAL);
 						}
 						if (auto_translate != null) {
+							tttalk.addAttribute("auto_translate",
+									auto_translate);
 							int mode = Integer.parseInt(auto_translate);
 							log.info(String.format("auto_translate=%d", mode));
 							switch (mode) {
@@ -236,6 +238,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 								log.info("AUTO_MANUAL END");
 								break;
 							case AUTO_BAIDU:
+
 								log.info("AUTO_BAIDU");
 								requestBaiduTranslate(msg);
 								break;
@@ -305,8 +308,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private void createBackgroundJob(String function, byte[] data,
-			String uniqueId)
-			throws IOException {
+			String uniqueId) throws IOException {
 		GearmanJob job = GearmanJobImpl.createBackgroundJob(function, data,
 				uniqueId);
 		try {
