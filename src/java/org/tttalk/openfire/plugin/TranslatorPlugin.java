@@ -221,6 +221,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 											+ "_auto_translate");
 						} catch (UserNotFoundException e) {
 							log.error(username, e);
+							auto_translate = String.valueOf(AUTO_MANUAL);
 						}
 						if (auto_translate != null) {
 							int mode = Integer.parseInt(auto_translate);
