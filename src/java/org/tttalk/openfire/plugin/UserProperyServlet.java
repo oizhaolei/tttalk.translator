@@ -29,7 +29,7 @@ public class UserProperyServlet extends AbstractTranslatorServlet {
 		PrintWriter out = response.getWriter();
 		try {
 			if (value == null) {
-				value = plugin.getProperty(username, key);
+				value = plugin.getProperty(username, key, null);
 				out.println(value);
 			} else {
 				plugin.updateProperty(username, key, value);
