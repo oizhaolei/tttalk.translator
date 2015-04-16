@@ -197,7 +197,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	@Override
 	public void interceptPacket(Packet packet, Session session,
 			boolean incoming, boolean processed) throws PacketRejectedException {
-		log.info("packet.toXML:" + packet.toXML());
 
 		if ((!processed) && (incoming) && (packet instanceof Message)) {
 			Message msg = (Message) packet;
