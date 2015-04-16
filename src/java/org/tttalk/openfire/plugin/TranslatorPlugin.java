@@ -464,7 +464,11 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			User user = userManager.getUser(username);
 			if (key == null)
 				return user.getProperties().toString();
-			return user.getProperties().get(key);
+			String value = user.getProperties().get(key);
+			if (value == null) {
+				value = def;
+			}
+			return value;
 		} catch (UserNotFoundException e) {
 			log.error(username, e);
 			return def;
