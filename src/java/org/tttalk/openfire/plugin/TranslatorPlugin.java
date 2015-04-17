@@ -215,28 +215,34 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							&& !from_lang.equalsIgnoreCase(to_lang)) {
 						String auto_translate = null;
 						String username = getUsernameFromJID(msg.getTo());
-						String key = getUsernameFromJID(msg.getFrom())
-								+ "_auto_translate";
-						auto_translate = getProperty(username, key,
-								String.valueOf(AUTO_BAIDU));
+						try {
+							auto_translate = getProperty(username,
+									getUsernameFromJID(msg.getFrom())
+											+ "_auto_translate");
+						} catch (UserNotFoundException e) {
+							log.error(username, e);
+							auto_translate = String.valueOf(AUTO_MANUAL);
+						}
+						if (auto_translate != null) {
+							tttalk.addAttribute("auto_translate",
+									auto_translate);
+							int mode = Integer.parseInt(auto_translate);
+							log.info(String.format("auto_translate=%d", mode));
+							switch (mode) {
+							case AUTO_NONE:
+								log.info("AUTO_NONE");
+								break;
+							case AUTO_MANUAL:
+								log.info("AUTO_MANUAL START");
+								requestManualTranslate(msg);
+								log.info("AUTO_MANUAL END");
+								break;
+							case AUTO_BAIDU:
 
-						tttalk.addAttribute("auto_translate", auto_translate);
-						int at_mode = Integer.parseInt(auto_translate);
-						log.info(String.format("auto_translate=%d", at_mode));
-						switch (at_mode) {
-						case AUTO_NONE:
-							log.info("AUTO_NONE");
-							break;
-						case AUTO_MANUAL:
-							log.info("AUTO_MANUAL START");
-							requestManualTranslate(msg);
-							log.info("AUTO_MANUAL END");
-							break;
-						case AUTO_BAIDU:
-
-							log.info("AUTO_BAIDU");
-							requestBaiduTranslate(msg);
-							break;
+								log.info("AUTO_BAIDU");
+								requestBaiduTranslate(msg);
+								break;
+							}
 						}
 					}
 				}
