@@ -3,7 +3,9 @@ package org.tttalk.openfire.plugin;
 //import java.io.File;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.dom4j.Element;
@@ -14,6 +16,9 @@ import org.gearman.client.GearmanJobImpl;
 import org.gearman.common.GearmanNIOJobServerConnection;
 import org.gearman.util.ByteUtils;
 import org.jivesoftware.openfire.MessageRouter;
+import org.jivesoftware.openfire.OfflineMessage;
+import org.jivesoftware.openfire.OfflineMessageStore;
+import org.jivesoftware.openfire.PresenceManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
@@ -52,6 +57,11 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final String TAG_TTTALK = "tttalk";
 	private static final String TAG_OLD_VERSION_TRANSLATED = "old_version_translated";
 
+	private static final String RECEIVED_TAG = "received";
+	private static final String RECEIVED_NAMASPACE = "urn:xmpp:receipts";
+	private static final String DELAY_TAG = "delay";
+	private static final String DELAY_NAMASPACE = "urn:xmpp:delay";
+
 	private static final String CHAT_TYPE_TEXT = "text";
 	private static final int AUTO_BAIDU = 2;
 	private static final int AUTO_MANUAL = 1;
@@ -66,14 +76,17 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 	private final XMPPServer server;
 	private final UserManager userManager;
+	private final PresenceManager presenceManager;
+	private final OfflineMessageStore offlineMessageStore;
 
 	public TranslatorPlugin() {
 		server = XMPPServer.getInstance();
 		router = server.getMessageRouter();
 		userManager = server.getUserManager();
 		interceptorManager = InterceptorManager.getInstance();
-
+		presenceManager = server.getPresenceManager();
 		gearmanClient = genGearmanClient();
+		offlineMessageStore = OfflineMessageStore.getInstance();
 
 	}
 
@@ -198,6 +211,9 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	public void interceptPacket(Packet packet, Session session,
 			boolean incoming, boolean processed) throws PacketRejectedException {
 
+		// Save to offline table
+		saveMessageToOfflineTable(packet, session, incoming, processed);
+
 		if ((!processed) && (incoming) && (packet instanceof Message)) {
 			Message msg = (Message) packet;
 			if (msg.getType() == Message.Type.chat) {
@@ -271,6 +287,65 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
+
+				deleteMessageFromOfflineTable(msg);
+			}
+		}
+	}
+
+	private void saveMessageToOfflineTable(Packet packet, Session session,
+			boolean incoming, boolean processed) {
+
+		log.info(String.format("%s %s %s %s", packet.getID(),
+				session.getAddress(), incoming ? "incoming" : "outcoming",
+				processed ? "processed" : "not processed"));
+		if ((processed) && (!incoming) && (packet instanceof Message)
+				&& isUserAvailable(packet.getTo().getNode())) {
+			Message msg = (Message) packet;
+			Element received = msg.getChildElement(RECEIVED_TAG,
+					RECEIVED_NAMASPACE);
+			Element delay = msg.getChildElement(DELAY_TAG, DELAY_NAMASPACE);
+			if (delay == null && received == null) {
+				offlineMessageStore.addMessage((Message) packet);
+			}
+		}
+	}
+
+	private boolean isUserAvailable(String username) {
+		try {
+			User user = userManager.getUser(username);
+			log.info(String.format("user %s %s", user.getName(),
+					presenceManager.isAvailable(user) ? "available"
+							: "not available"));
+			return presenceManager.isAvailable(user);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private void deleteMessageFromOfflineTable(Message receivedMessage) {
+		Element received = receivedMessage.getChildElement(RECEIVED_TAG,
+				RECEIVED_NAMASPACE);
+		if (received == null)
+			return;
+
+		String receivedId = received.attributeValue("id");
+		log.info(String.format("Received %s=>%s(%s)", receivedMessage.getFrom()
+				.getNode(), receivedMessage.getTo().getNode(), receivedId));
+
+		Collection<OfflineMessage> offlineMessages = offlineMessageStore
+				.getMessages(receivedMessage.getFrom().getNode(), false);
+		Iterator<OfflineMessage> iterator = offlineMessages.iterator();
+
+		while (iterator.hasNext()) {
+			OfflineMessage offlineMessage = iterator.next();
+			log.info(String.format("offlineMessage= %s %d %s", receivedMessage
+					.getFrom().getNode(), offlineMessage.getCreationDate()
+					.getTime(), offlineMessage.getID()));
+			if (receivedId.equals(offlineMessage.getID())) {
+				offlineMessageStore.deleteMessage(receivedMessage.getFrom()
+						.getNode(), offlineMessage.getCreationDate());
+				break;
 			}
 		}
 	}
