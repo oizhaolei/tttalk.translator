@@ -27,6 +27,7 @@ import org.jivesoftware.openfire.interceptor.PacketInterceptor;
 import org.jivesoftware.openfire.interceptor.PacketRejectedException;
 import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.openfire.user.User;
+import org.jivesoftware.openfire.user.UserAlreadyExistsException;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.jivesoftware.util.JiveGlobals;
@@ -196,13 +197,23 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		return "chinatalk_" + userid + "@tttalk.org/tttalk";
 	}
 
-	public void updateUserPwd(String username, String newPwd) {
+	public void changePassword(String username, String password) {
 
 		try {
 			User user = userManager.getUser(username);
-			user.setPassword(newPwd);
-			log.info(String.format("updateUserPwd:%s,%s", username, newPwd));
+			user.setPassword(password);
+			log.info(String.format("changePassword:%s,%s", username, password));
 		} catch (UserNotFoundException e) {
+			log.error(username, e);
+		}
+	}
+
+	public void createAccount(String username, String password) {
+		try {
+			User user = userManager.createUser(username, password, null, null);
+			log.info(String.format("createAccount:%s,%s", user.getUID(),
+					user.getUsername()));
+		} catch (UserAlreadyExistsException e) {
 			log.error(username, e);
 		}
 	}
