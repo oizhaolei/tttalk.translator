@@ -58,6 +58,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final String TAG_TTTALK = "tttalk";
 	private static final String TAG_OLD_VERSION_TRANSLATED = "old_version_translated";
 
+	private static final String REQUEST_TAG = "request";
 	private static final String RECEIVED_TAG = "received";
 	private static final String RECEIVED_NAMASPACE = "urn:xmpp:receipts";
 	private static final String DELAY_TAG = "delay";
@@ -134,6 +135,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		tttalkNode.addAttribute("cost", cost);
 		tttalkNode.addAttribute("auto_translate", auto_translate);
 
+		addRequestReceipts(message);
+
 		log.info(message.toXML());
 		router.route(message);
 	}
@@ -154,6 +157,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		tttalkNode.addAttribute("title", subject);
 		tttalkNode.addAttribute("message_id", messageId);
+
+		addRequestReceipts(message);
 
 		log.info(message.toXML());
 		router.route(message);
@@ -185,6 +190,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		tttalkNode.addAttribute("from_content", from_content);
 		tttalkNode.addAttribute("to_content", to_content);
 		tttalkNode.addAttribute("create_date", create_date);
+
+		addRequestReceipts(message);
 
 		for (String v : to_users) {
 			message.setTo(v);
@@ -299,17 +306,21 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					log.error(e.getMessage(), e);
 				}
 
-				deleteMessageFromOfflineTable(msg);
 			}
+			deleteMessageFromOfflineTable(msg);
 		}
+	}
+
+	private void addRequestReceipts(Message message) {
+		if (message.getID() == null) {
+			message.setID(String.valueOf(System.currentTimeMillis()));
+		}
+		message.addChildElement(REQUEST_TAG, RECEIVED_NAMASPACE);
 	}
 
 	private void saveMessageToOfflineTable(Packet packet, Session session,
 			boolean incoming, boolean processed) {
 
-		log.info(String.format("%s %s %s %s", packet.getID(),
-				session.getAddress(), incoming ? "incoming" : "outcoming",
-				processed ? "processed" : "not processed"));
 		if ((processed) && (!incoming) && (packet instanceof Message)
 				&& isUserAvailable(packet.getTo().getNode())) {
 			Message msg = (Message) packet;
