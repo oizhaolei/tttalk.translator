@@ -221,7 +221,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			log.info(String.format("createAccount:%s,%s", user.getUID(),
 					user.getUsername()));
 		} catch (UserAlreadyExistsException e) {
-			log.error(username, e);
+			log.error(username + " UserAlreadyExists.");
 		}
 	}
 
