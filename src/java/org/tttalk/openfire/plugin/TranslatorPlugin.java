@@ -222,6 +222,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					user.getUsername()));
 		} catch (UserAlreadyExistsException e) {
 			log.error(username + " UserAlreadyExists.");
+			changePassword(username, password);
 		}
 	}
 
