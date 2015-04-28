@@ -64,6 +64,10 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final String DELAY_TAG = "delay";
 	private static final String DELAY_NAMASPACE = "urn:xmpp:delay";
 
+	private static final String VOLUNTEER_NAMESPACE = "http://tttalk.org/protocol/volunteer";
+	private static final String TAG_REQUEST = "request";
+	private static final String TAG_CANCEL = "cancel";
+
 	private static final String CHAT_TYPE_TEXT = "text";
 	private static final int AUTO_BAIDU = 2;
 	private static final int AUTO_MANUAL = 1;
@@ -328,7 +332,12 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			Element received = msg.getChildElement(RECEIVED_TAG,
 					RECEIVED_NAMASPACE);
 			Element delay = msg.getChildElement(DELAY_TAG, DELAY_NAMASPACE);
-			if (delay == null && received == null) {
+			Element volunteer_request = msg.getChildElement(TAG_REQUEST,
+					VOLUNTEER_NAMESPACE);
+			Element volunteer_cancel = msg.getChildElement(TAG_CANCEL,
+					VOLUNTEER_NAMESPACE);
+			if (delay == null && received == null && volunteer_request == null
+					&& volunteer_cancel == null) {
 				offlineMessageStore.addMessage((Message) packet);
 			}
 		}
