@@ -406,7 +406,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		try {
 			gearmanClient.submit(job);
 		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			log.error(e.getMessage());
 			gearmanClient = genGearmanClient();
 			gearmanClient.submit(job);
 		}
