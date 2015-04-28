@@ -3,9 +3,11 @@ package org.tttalk.openfire.plugin;
 //import java.io.File;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.dom4j.Element;
@@ -15,8 +17,8 @@ import org.gearman.client.GearmanJob;
 import org.gearman.client.GearmanJobImpl;
 import org.gearman.common.GearmanNIOJobServerConnection;
 import org.gearman.util.ByteUtils;
+import org.jivesoftware.database.DbConnectionManager;
 import org.jivesoftware.openfire.MessageRouter;
-import org.jivesoftware.openfire.OfflineMessage;
 import org.jivesoftware.openfire.OfflineMessageStore;
 import org.jivesoftware.openfire.PresenceManager;
 import org.jivesoftware.openfire.XMPPServer;
@@ -73,11 +75,16 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final int AUTO_MANUAL = 1;
 	private static final int AUTO_NONE = 0;
 
+	private static final String TTTALK_USER_VOLUNTEER = "tttalk.user.volunteer";
 	private static final String TTTALK_USER_TRANSLATOR = "tttalk.user.translator";
 	private final InterceptorManager interceptorManager;
 
 	public String getTranslator() {
 		return JiveGlobals.getProperty(TTTALK_USER_TRANSLATOR);
+	}
+
+	public String getVolunteer() {
+		return JiveGlobals.getProperty(TTTALK_USER_VOLUNTEER);
 	}
 
 	private final XMPPServer server;
@@ -338,6 +345,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					VOLUNTEER_NAMESPACE);
 			if (delay == null && received == null && volunteer_request == null
 					&& volunteer_cancel == null) {
+				log.info(String.format("saveto offline:%s", packet.toXML()));
 				offlineMessageStore.addMessage((Message) packet);
 			}
 		}
@@ -346,9 +354,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private boolean isUserAvailable(String username) {
 		try {
 			User user = userManager.getUser(username);
-			log.info(String.format("user %s %s", user.getName(),
-					presenceManager.isAvailable(user) ? "available"
-							: "not available"));
 			return presenceManager.isAvailable(user);
 		} catch (Exception e) {
 			return false;
@@ -356,29 +361,42 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private void deleteMessageFromOfflineTable(Message receivedMessage) {
+
 		Element received = receivedMessage.getChildElement(RECEIVED_TAG,
 				RECEIVED_NAMASPACE);
 		if (received == null)
 			return;
-
+		String username = receivedMessage.getFrom().getNode();
 		String receivedId = received.attributeValue("id");
-		log.info(String.format("Received %s=>%s(%s)", receivedMessage.getFrom()
-				.getNode(), receivedMessage.getTo().getNode(), receivedId));
 
-		Collection<OfflineMessage> offlineMessages = offlineMessageStore
-				.getMessages(receivedMessage.getFrom().getNode(), false);
-		Iterator<OfflineMessage> iterator = offlineMessages.iterator();
+		try {
+			Connection con = DbConnectionManager.getConnection();
+			String sql = String
+					.format("select * from ofOffline where username='%s' and stanza like '%s'",
+							username, "%id=\"" + receivedId + "\"%");
+			PreparedStatement pstmt = con.prepareStatement(sql);
 
-		while (iterator.hasNext()) {
-			OfflineMessage offlineMessage = iterator.next();
-			log.info(String.format("offlineMessage= %s %d %s", receivedMessage
-					.getFrom().getNode(), offlineMessage.getCreationDate()
-					.getTime(), offlineMessage.getID()));
-			if (receivedId.equals(offlineMessage.getID())) {
-				offlineMessageStore.deleteMessage(receivedMessage.getFrom()
-						.getNode(), offlineMessage.getCreationDate());
-				break;
+			ResultSet resultSet = pstmt.executeQuery();
+			if (resultSet.next()) {
+				String msgId = resultSet.getString(2);
+				String offlineMsg = resultSet.getString(5);
+				log.info("delete offline:" + offlineMsg);
+				sql = String
+						.format("delete from ofOffline where username='%s' and messageID=%s",
+								username, msgId);
+				pstmt = con.prepareStatement(sql);
+				pstmt.execute();
 			}
+			sql = String
+					.format("delete from ofOffline where username='%s' or username='%s'",
+							getTranslator(), getVolunteer());
+			pstmt = con.prepareStatement(sql);
+			pstmt.execute();
+
+		} catch (SQLException e) {
+			log.info("exception=" + e.getMessage());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
