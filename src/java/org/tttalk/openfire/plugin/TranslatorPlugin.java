@@ -278,6 +278,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 						log.info(String.format("auto_translate=%d", at_mode));
 						switch (at_mode) {
 						case AUTO_NONE:
+							tttalk.addAttribute("message_id", "0");
 							log.info("AUTO_NONE");
 							break;
 						case AUTO_MANUAL:
@@ -295,6 +296,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 									from_lang, to_lang, msg.getBody());
 							break;
 						}
+					} else {
+						tttalk.addAttribute("message_id", "0");
 					}
 				}
 
