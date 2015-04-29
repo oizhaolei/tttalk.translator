@@ -267,7 +267,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 								String.valueOf(AUTO_BAIDU));
 
 						String message_id = tttalk.attributeValue("message_id");
-						if (message_id == null) {
+						if (message_id == null || "null".equals(message_id)) {
 							message_id = String.valueOf(System
 									.currentTimeMillis());
 							tttalk.addAttribute("message_id", message_id);
@@ -560,8 +560,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 			postParams.put("userid", userid);
 			postParams.put("loginid", userid);
-			postParams.put("local_id",
-					String.valueOf(System.currentTimeMillis()));
 			postParams.put("from_lang", from_lang);
 			postParams.put("to_lang", to_lang);
 			postParams.put("text", text);

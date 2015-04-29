@@ -152,7 +152,7 @@ public class Utils {
 		return JiveGlobals
 				.getProperty(
 						BAIDU_TRANSLATE_URL,
-						"http://app.tttalk.org/tttalk150214/message/message_request_baidu_translate.php");
+						"http://ctalk/tttalk150214/message/message_request_baidu_translate.php");
 	}
 
 	public static void setManualTranslateUrl(String url) {
@@ -162,7 +162,7 @@ public class Utils {
 	public static String getManualTranslateUrl() {
 		return JiveGlobals
 				.getProperty(MANUAL_TRANSLATE_URL,
-						"http://app.tttalk.org/tttalk150214/message/message_request_translate.php");
+						"http://ctalk/tttalk150214/message/message_request_translate.php");
 	}
 
 	public static String getClientId(String address) {
