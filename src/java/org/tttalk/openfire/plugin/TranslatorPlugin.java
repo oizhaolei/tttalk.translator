@@ -255,6 +255,13 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 						auto_translate = getProperty(username, key,
 								String.valueOf(AUTO_BAIDU));
 
+						String message_id = tttalk.attributeValue("message_id");
+						if (message_id == null) {
+							message_id = String.valueOf(System
+									.currentTimeMillis());
+							tttalk.addAttribute("message_id", message_id);
+						}
+
 						tttalk.addAttribute("auto_translate", auto_translate);
 						int at_mode = Integer.parseInt(auto_translate);
 						log.info(String.format("auto_translate=%d", at_mode));
@@ -264,13 +271,17 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							break;
 						case AUTO_MANUAL:
 							log.info("AUTO_MANUAL START");
-							requestManualTranslate(msg);
+							requestManualTranslate(msg.getFrom(), msg.getTo(),
+									message_id, from_lang, to_lang,
+									msg.getBody(), type,
+									tttalk.attributeValue("content_length"));
 							log.info("AUTO_MANUAL END");
 							break;
 						case AUTO_BAIDU:
 
 							log.info("AUTO_BAIDU");
-							requestBaiduTranslate(msg);
+							requestBaiduTranslate(msg.getTo(), message_id,
+									from_lang, to_lang, msg.getBody());
 							break;
 						}
 					}
@@ -450,54 +461,73 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		return temp.substring(0, temp.indexOf("@"));
 	}
 
-	public void requestBaiduTranslate(Message msg) {
-		Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
-		tttalk.addAttribute("message_id",
-				String.valueOf(System.currentTimeMillis()));
+	public void requestBaiduTranslate(JID to, String message_id,
+			String from_lang, String to_lang, String text) {
 
-		new Thread(new BaiduTranslateRunnable(msg), "Baidu").start();
+		new Thread(new BaiduTranslateRunnable(to, message_id, from_lang,
+				to_lang, text), "Baidu").start();
 	}
 
 	public class BaiduTranslateRunnable implements Runnable {
+		JID to;
+		String message_id;
+		String from_lang;
+		String to_lang;
+		String text;
 
-		private final Message msg;
-
-		public BaiduTranslateRunnable(Message msg) {
-			this.msg = msg;
+		public BaiduTranslateRunnable(JID to, String message_id,
+				String from_lang, String to_lang, String text) {
+			this.to = to;
+			this.message_id = message_id;
+			this.from_lang = from_lang;
+			this.to_lang = to_lang;
+			this.text = text;
 		}
 
 		@Override
 		public void run() {
-			Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
-			String userid = getTTTalkId(msg.getTo());
-			String message_id = tttalk.attributeValue("message_id");
+			String userid = getTTTalkId(to);
 
 			final Map<String, String> postParams = new HashMap<String, String>();
 			postParams.put("userid", userid);
 			postParams.put("loginid", userid);
-			postParams.put("from_lang", tttalk.attributeValue("from_lang"));
-			postParams.put("to_lang", tttalk.attributeValue("to_lang"));
-			postParams.put("text", msg.getBody());
+			postParams.put("from_lang", from_lang);
+			postParams.put("to_lang", to_lang);
+			postParams.put("text", text);
 			String response = Utils.post(Utils.getBaiduTranslateUrl(),
 					postParams);
 			String to_content = parseBaiduResponse(response);
 
-			translated(message_id, msg.getTo().toString(), to_content, "0", "1");
+			translated(message_id, to.toString(), to_content, "0", "1");
 		}
 	}
 
 	public class ManualTranslateRunnable implements Runnable {
+		JID from;
+		JID to;
+		String message_id;
+		String from_lang;
+		String to_lang;
+		String text;
+		String filetype;
+		String content_length;
 
-		private final Message msg;
-
-		public ManualTranslateRunnable(Message msg) {
-			this.msg = msg;
+		public ManualTranslateRunnable(JID from, JID to, String message_id,
+				String from_lang, String to_lang, String text, String filetype,
+				String content_length) {
+			this.from = from;
+			this.to = to;
+			this.message_id = message_id;
+			this.from_lang = from_lang;
+			this.to_lang = to_lang;
+			this.text = text;
+			this.filetype = filetype;
+			this.content_length = content_length;
 		}
 
 		@Override
 		public void run() {
-			Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
-			String userid = getTTTalkId(msg.getTo());
+			String userid = getTTTalkId(to);
 
 			Map<String, String> postParams = new HashMap<String, String>();
 
@@ -505,26 +535,24 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			postParams.put("loginid", userid);
 			postParams.put("local_id",
 					String.valueOf(System.currentTimeMillis()));
-			postParams.put("from_lang", tttalk.attributeValue("from_lang"));
-			postParams.put("to_lang", tttalk.attributeValue("to_lang"));
-			postParams.put("text", msg.getBody());
-			postParams.put("filetype", tttalk.attributeValue("type"));
-			postParams.put("local_id", tttalk.attributeValue("message_id"));
-			postParams.put("content_length",
-					tttalk.attributeValue("content_length"));
-			postParams.put("to_userid", String.valueOf(-1));
+			postParams.put("from_lang", from_lang);
+			postParams.put("to_lang", to_lang);
+			postParams.put("text", text);
+			postParams.put("filetype", filetype);
+			postParams.put("local_id", message_id);
+			postParams.put("content_length", content_length);
+			postParams.put("to_userid", getTTTalkId(from));
 
 			Utils.post(Utils.getManualTranslateUrl(), postParams);
 
 		}
 	}
 
-	public void requestManualTranslate(Message msg) {
-		Element tttalk = msg.getChildElement(TAG_TTTALK, TTTALK_NAMESPACE);
-		tttalk.addAttribute("message_id",
-				String.valueOf(System.currentTimeMillis()));
-
-		new Thread(new ManualTranslateRunnable(msg), "Manual").start();
+	public void requestManualTranslate(JID from, JID to, String message_id,
+			String from_lang, String to_lang, String text, String filetype,
+			String content_length) {
+		new Thread(new ManualTranslateRunnable(from, to, message_id, from_lang,
+				to_lang, text, filetype, content_length), "Manual").start();
 	}
 
 	private String parseBaiduResponse(String body) {
