@@ -292,8 +292,9 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 						case AUTO_BAIDU:
 
 							log.info("AUTO_BAIDU");
-							requestBaiduTranslate(msg.getTo(), message_id,
-									from_lang, to_lang, msg.getBody());
+							requestBaiduTranslate(msg.getFrom(), msg.getTo(),
+									message_id, from_lang, to_lang,
+									msg.getBody());
 							break;
 						}
 					} else {
@@ -491,22 +492,24 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		return temp.substring(0, temp.indexOf("@"));
 	}
 
-	public void requestBaiduTranslate(JID to, String message_id,
+	public void requestBaiduTranslate(JID from, JID to, String message_id,
 			String from_lang, String to_lang, String text) {
 
-		new Thread(new BaiduTranslateRunnable(to, message_id, from_lang,
+		new Thread(new BaiduTranslateRunnable(from, to, message_id, from_lang,
 				to_lang, text), "Baidu").start();
 	}
 
 	public class BaiduTranslateRunnable implements Runnable {
+		JID from;
 		JID to;
 		String message_id;
 		String from_lang;
 		String to_lang;
 		String text;
 
-		public BaiduTranslateRunnable(JID to, String message_id,
+		public BaiduTranslateRunnable(JID from, JID to, String message_id,
 				String from_lang, String to_lang, String text) {
+			this.from = from;
 			this.to = to;
 			this.message_id = message_id;
 			this.from_lang = from_lang;
@@ -529,6 +532,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			String to_content = parseBaiduResponse(response);
 
 			translated(message_id, to.toString(), to_content, "0", "1");
+			translated(message_id, from.toString(), to_content, "0", "1");
 		}
 	}
 
