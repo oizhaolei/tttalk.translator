@@ -532,7 +532,9 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			String to_content = parseBaiduResponse(response);
 
 			translated(message_id, to.toString(), to_content, "0", "1");
-			translated(message_id, from.toString(), to_content, "0", "1");
+			if (to_content != null && !text.equals(to_content)) {
+				translated(message_id, from.toString(), to_content, "0", "1");
+			}
 		}
 	}
 
