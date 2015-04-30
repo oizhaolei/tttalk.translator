@@ -360,7 +360,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					VOLUNTEER_NAMESPACE);
 			if (delay == null && received == null && volunteer_request == null
 					&& volunteer_cancel == null) {
-				log.info(String.format("saveto offline:%s", packet.toXML()));
+				log.info(String.format("saveto offline:%s", packet.getID()));
 				offlineMessageStore.addMessage((Message) packet);
 			}
 		}
@@ -376,6 +376,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private void deleteMessageFromOfflineTable(Message receivedMessage) {
+		long start = System.currentTimeMillis();
 
 		Element received = receivedMessage.getChildElement(RECEIVED_TAG,
 				RECEIVED_NAMASPACE);
@@ -384,35 +385,40 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String username = receivedMessage.getFrom().getNode();
 		String receivedId = received.attributeValue("id");
 
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet resultSet = null;
 		try {
-			Connection con = DbConnectionManager.getConnection();
+			con = DbConnectionManager.getConnection();
 			String sql = String
-					.format("select * from ofOffline where username='%s' and stanza like '%s'",
+					.format("select messageID from ofOffline where username='%s' and stanza like '%s'",
 							username, "%id=\"" + receivedId + "\"%");
-			PreparedStatement pstmt = con.prepareStatement(sql);
+			pstmt = con.prepareStatement(sql);
 
-			ResultSet resultSet = pstmt.executeQuery();
+			resultSet = pstmt.executeQuery();
 			if (resultSet.next()) {
-				String msgId = resultSet.getString(2);
-				String offlineMsg = resultSet.getString(5);
-				log.info("delete offline:" + offlineMsg);
+				String msgId = resultSet.getString(1);
+				pstmt.close();
 				sql = String
 						.format("delete from ofOffline where username='%s' and messageID=%s",
 								username, msgId);
 				pstmt = con.prepareStatement(sql);
 				pstmt.execute();
+				pstmt.close();
 			}
 			sql = String
 					.format("delete from ofOffline where username='%s' or username='%s'",
 							getTranslator(), getVolunteer());
 			pstmt = con.prepareStatement(sql);
 			pstmt.execute();
+			pstmt.close();
 
 		} catch (SQLException e) {
-			log.info("exception=" + e.getMessage());
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.info(e.getMessage(), e);
+		} finally {
+			DbConnectionManager.closeConnection(resultSet, pstmt, con);
 		}
+		log.info("delete offline: " + (System.currentTimeMillis() - start));
 	}
 
 	private void submitOldVersionJob(String packetId, String toTTTalkId,
