@@ -222,7 +222,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			user.setPassword(password);
 			log.info(String.format("changePassword:%s,%s", username, password));
 		} catch (UserNotFoundException e) {
-			log.error(username, e);
+			log.info(username, e);
 		}
 	}
 
@@ -232,7 +232,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			log.info(String.format("createAccount:%s,%s", user.getUID(),
 					user.getUsername()));
 		} catch (UserAlreadyExistsException e) {
-			log.error(username + " UserAlreadyExists.");
+			log.info(username + " UserAlreadyExists.");
 			changePassword(username, password);
 		}
 	}
