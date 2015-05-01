@@ -15,6 +15,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 public class Utils {
 	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
+	private static final String OFFLINE_HANDLE = "tttalk.offline.handle";
 	private static final String BAIDU_TRANSLATE_URL = "tttalk.baidu.url";
 	private static final String MANUAL_TRANSLATE_URL = "tttalk.manual.url";
 	private static final String TTTALK_APP_SECRET = "tttalk.app.secret";
@@ -142,6 +143,10 @@ public class Utils {
 
 	public static int getGearmanPort() {
 		return JiveGlobals.getIntProperty(TTTALK_GEARMAN_PORT, 4730);
+	}
+
+	public static boolean getOfflineHandle() {
+		return JiveGlobals.getBooleanProperty(OFFLINE_HANDLE, true);
 	}
 
 	public static void setBaiduTranslateUrl(String url) {

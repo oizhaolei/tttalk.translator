@@ -344,6 +344,9 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 	private void saveMessageToOfflineTable(Packet packet, Session session,
 			boolean incoming, boolean processed) {
+		if (!Utils.getOfflineHandle()) {
+			return;
+		}
 
 		if ((processed) && (!incoming) && (packet instanceof Message)
 				&& isUserAvailable(packet.getTo().getNode())) {
@@ -373,6 +376,9 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private void deleteMessageFromOfflineTable(Message receivedMessage) {
+		if (!Utils.getOfflineHandle()) {
+			return;
+		}
 		long start = System.currentTimeMillis();
 
 		Element received = receivedMessage.getChildElement(RECEIVED_TAG,
@@ -498,8 +504,10 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	public void requestBaiduTranslate(JID from, JID to, String message_id,
 			String from_lang, String to_lang, String text) {
 
-		new Thread(new BaiduTranslateRunnable(from, to, message_id, from_lang,
-				to_lang, text), "Baidu").start();
+		// new Thread(new BaiduTranslateRunnable(from, to, message_id,
+		// from_lang,
+		// to_lang, text), "Baidu").start();
+		_baiduTranslate(from, to, message_id, from_lang, to_lang, text);
 	}
 
 	public class BaiduTranslateRunnable implements Runnable {
@@ -522,21 +530,25 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		@Override
 		public void run() {
-			String userid = getTTTalkId(to);
-
-			final Map<String, String> postParams = new HashMap<String, String>();
-			postParams.put("userid", userid);
-			postParams.put("loginid", userid);
-			postParams.put("from_lang", from_lang);
-			postParams.put("to_lang", to_lang);
-			postParams.put("text", text);
-			String response = Utils.post(Utils.getBaiduTranslateUrl(),
-					postParams);
-			String to_content = parseBaiduResponse(response);
-
-			translated(message_id, to.toString(), to_content, "0", "1");
-			translated(message_id, from.toString(), to_content, "0", "1");
+			_baiduTranslate(from, to, message_id, from_lang, to_lang, text);
 		}
+	}
+
+	private void _baiduTranslate(JID from, JID to, String message_id,
+			String from_lang, String to_lang, String text) {
+		String userid = getTTTalkId(to);
+
+		final Map<String, String> postParams = new HashMap<String, String>();
+		postParams.put("userid", userid);
+		postParams.put("loginid", userid);
+		postParams.put("from_lang", from_lang);
+		postParams.put("to_lang", to_lang);
+		postParams.put("text", text);
+		String response = Utils.post(Utils.getBaiduTranslateUrl(), postParams);
+		String to_content = parseBaiduResponse(response);
+
+		translated(message_id, to.toString(), to_content, "0", "1");
+		translated(message_id, from.toString(), to_content, "0", "1");
 	}
 
 	public class ManualTranslateRunnable implements Runnable {
@@ -564,30 +576,40 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		@Override
 		public void run() {
-			String userid = getTTTalkId(to);
-
-			Map<String, String> postParams = new HashMap<String, String>();
-
-			postParams.put("userid", userid);
-			postParams.put("loginid", userid);
-			postParams.put("from_lang", from_lang);
-			postParams.put("to_lang", to_lang);
-			postParams.put("text", text);
-			postParams.put("filetype", filetype);
-			postParams.put("local_id", message_id);
-			postParams.put("content_length", content_length);
-			postParams.put("to_userid", getTTTalkId(from));
-
-			Utils.post(Utils.getManualTranslateUrl(), postParams);
+			_manualTranslate(from, to, message_id, from_lang, to_lang, text,
+					filetype, content_length);
 
 		}
+	}
+
+	private void _manualTranslate(JID from, JID to, String message_id,
+			String from_lang, String to_lang, String text, String filetype,
+			String content_length) {
+		String userid = getTTTalkId(to);
+
+		Map<String, String> postParams = new HashMap<String, String>();
+
+		postParams.put("userid", userid);
+		postParams.put("loginid", userid);
+		postParams.put("from_lang", from_lang);
+		postParams.put("to_lang", to_lang);
+		postParams.put("text", text);
+		postParams.put("filetype", filetype);
+		postParams.put("local_id", message_id);
+		postParams.put("content_length", content_length);
+		postParams.put("to_userid", getTTTalkId(from));
+
+		Utils.post(Utils.getManualTranslateUrl(), postParams);
 	}
 
 	public void requestManualTranslate(JID from, JID to, String message_id,
 			String from_lang, String to_lang, String text, String filetype,
 			String content_length) {
-		new Thread(new ManualTranslateRunnable(from, to, message_id, from_lang,
-				to_lang, text, filetype, content_length), "Manual").start();
+		// new Thread(new ManualTranslateRunnable(from, to, message_id,
+		// from_lang,
+		// to_lang, text, filetype, content_length), "Manual").start();
+		_manualTranslate(from, to, message_id, from_lang, to_lang, text,
+				filetype, content_length);
 	}
 
 	private String parseBaiduResponse(String body) {
