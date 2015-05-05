@@ -58,6 +58,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final String TAG_TRANSLATED = "translated";
 	private static final String TAG_TRANSLATING = "translating";
 	private static final String TAG_TTTALK = "tttalk";
+	private static final String TAG_CHAT = "chat";
 	private static final String TAG_OLD_VERSION_TRANSLATED = "old_version_translated";
 
 	private static final String REQUEST_TAG = "request";
@@ -211,6 +212,33 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		}
 	}
 
+	public void chat(String from_user_id, String to_user_id, String from_lang, String to_lang, String file_path,
+			String file_type, String file_length, String from_content) {
+		Message message = new Message();
+		message.setType(Message.Type.chat);
+		message.setID(from_user_id);
+
+		message.setFrom(createXMPPuser(from_user_id));
+		String subject = TAG_CHAT;
+		message.setSubject(subject);
+
+		Element tttalkNode = message.addChildElement(TAG_CHAT, TTTALK_NAMESPACE);
+
+		tttalkNode.addAttribute("title", subject);
+		tttalkNode.addAttribute("from_lang", from_lang);
+		tttalkNode.addAttribute("to_lang", to_lang);
+		tttalkNode.addAttribute("file_path", file_path);
+		tttalkNode.addAttribute("file_type", file_type);
+		tttalkNode.addAttribute("file_length", file_length);
+		tttalkNode.addAttribute("from_content", from_content);
+
+		addRequestReceipts(message);
+
+		message.setTo(createXMPPuser(to_user_id));
+		log.info(message.toXML());
+		router.route(message);
+	}
+	
 	public String createXMPPuser(String userid) {
 		return "chinatalk_" + userid + "@tttalk.org/tttalk";
 	}
