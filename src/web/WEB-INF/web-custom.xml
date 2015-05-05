@@ -67,4 +67,15 @@
         <servlet-name>UserProperyServlet</servlet-name>
         <url-pattern>/userproperties</url-pattern>
     </servlet-mapping>
+    
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>ChatServlet</servlet-name>
+        <servlet-class>org.tttalk.openfire.plugin.ChatServlet</servlet-class>
+    </servlet>
+    <!-- Servlet mappings -->
+    <servlet-mapping>
+        <servlet-name>ChatServlet</servlet-name>
+        <url-pattern>/chat</url-pattern>
+    </servlet-mapping>
 </web-app>
