@@ -149,8 +149,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		addRequestReceipts(message);
 
-		log.info(message.getTo().toString());
-		log.info(message.toXML());
+		log.info("translated=" + message.toXML());
 		router.route(message);
 	}
 
@@ -350,10 +349,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			}
 			deleteMessageFromOfflineTable(msg);
 		}
-
-		if ((processed) && (!incoming) && (packet instanceof Message)) {
-			log.info("====>" + packet.toXML());
-		}
 	}
 
 	private void addRequestReceipts(Message message) {
@@ -392,9 +387,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		try {
 			User user = userManager.getUser(username);
 			result = presenceManager.isAvailable(user);
-			log.info("isUserAvailable result=" + (result ? "yes" : "not"));
 		} catch (Exception e) {
-			log.info("isUserAvailable exception");
 		}
 		return result;
 	}
