@@ -129,6 +129,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	public void translated(String messageId, String userId, String toContent,
 			String cost, String auto_translate) {
 		Message message = new Message();
+		userId = userId.split("/")[0];
 		message.setTo(userId);
 		message.setFrom(getTranslator() + "@"
 				+ server.getServerInfo().getXMPPDomain());
@@ -148,6 +149,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		addRequestReceipts(message);
 
+		log.info(message.getTo().toString());
 		log.info(message.toXML());
 		router.route(message);
 	}
@@ -225,7 +227,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		log.info(message.toXML());
 		router.route(message);
 	}
-	
+
 	public String createXMPPuser(String userid) {
 		return "chinatalk_" + userid + "@tttalk.org/tttalk";
 	}
@@ -348,6 +350,10 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			}
 			deleteMessageFromOfflineTable(msg);
 		}
+
+		if ((processed) && (!incoming) && (packet instanceof Message)) {
+			log.info("====>" + packet.toXML());
+		}
 	}
 
 	private void addRequestReceipts(Message message) {
@@ -382,12 +388,15 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	private boolean isUserAvailable(String username) {
+		boolean result = false;
 		try {
 			User user = userManager.getUser(username);
-			return presenceManager.isAvailable(user);
+			result = presenceManager.isAvailable(user);
+			log.info("isUserAvailable result=" + (result ? "yes" : "not"));
 		} catch (Exception e) {
-			return false;
+			log.info("isUserAvailable exception");
 		}
+		return result;
 	}
 
 	private void deleteMessageFromOfflineTable(Message receivedMessage) {
