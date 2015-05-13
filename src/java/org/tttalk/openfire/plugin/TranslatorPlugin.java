@@ -561,11 +561,16 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		postParams.put("from_lang", from_lang);
 		postParams.put("to_lang", to_lang);
 		postParams.put("text", text);
-		String response = Utils.post(Utils.getBaiduTranslateUrl(), postParams);
-		String to_content = parseBaiduResponse(response);
+		try {
+			String response = Utils.post(Utils.getBaiduTranslateUrl(),
+					postParams);
+			String to_content = parseBaiduResponse(response);
 
-		translated(message_id, to.toString(), to_content, "0", "1");
-		translated(message_id, from.toString(), to_content, "0", "1");
+			translated(message_id, to.toString(), to_content, "0", "1");
+			translated(message_id, from.toString(), to_content, "0", "1");
+		} catch (Exception e) {
+			log.error("Baidu Exception=" + e.getMessage());
+		}
 	}
 
 	public class ManualTranslateRunnable implements Runnable {
@@ -616,7 +621,11 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		postParams.put("content_length", content_length);
 		postParams.put("to_userid", getTTTalkId(from));
 
-		Utils.post(Utils.getManualTranslateUrl(), postParams);
+		try {
+			Utils.post(Utils.getManualTranslateUrl(), postParams);
+		} catch (Exception e) {
+			log.error("Manual Exception=" + e.getMessage());
+		}
 	}
 
 	public void requestManualTranslate(JID from, JID to, String message_id,
