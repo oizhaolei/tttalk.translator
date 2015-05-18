@@ -312,6 +312,13 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 									msg.getBody());
 							break;
 						}
+					} else {
+						String message_id = tttalk.attributeValue("message_id");
+						if (message_id == null || "null".equals(message_id)) {
+							message_id = String.valueOf(System
+									.currentTimeMillis());
+							tttalk.addAttribute("message_id", message_id);
+						}
 					}
 				}
 
