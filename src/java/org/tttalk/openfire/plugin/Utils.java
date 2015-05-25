@@ -18,6 +18,7 @@ public class Utils {
 	private static final String OFFLINE_HANDLE = "tttalk.offline.handle";
 	private static final String BAIDU_TRANSLATE_URL = "tttalk.baidu.url";
 	private static final String MANUAL_TRANSLATE_URL = "tttalk.manual.url";
+	private static final String INCREASE_BADGE_URL = "tttalk.increatebadge.url";
 	private static final String TTTALK_APP_SECRET = "tttalk.app.secret";
 	private static final String TTTALK_GEARMAN_HOST = "tttalk.gearman.host";
 	private static final String TTTALK_GEARMAN_PORT = "tttalk.gearman.prt";
@@ -155,8 +156,7 @@ public class Utils {
 
 	public static String getBaiduTranslateUrl() {
 		return JiveGlobals
-				.getProperty(
-						BAIDU_TRANSLATE_URL,
+				.getProperty(BAIDU_TRANSLATE_URL,
 						"http://ctalk/tttalk150214/message/message_request_baidu_translate.php");
 	}
 
@@ -168,6 +168,11 @@ public class Utils {
 		return JiveGlobals
 				.getProperty(MANUAL_TRANSLATE_URL,
 						"http://ctalk/tttalk150214/message/message_request_translate.php");
+	}
+
+	public static String getBadgeCountIncreaseUrl() {
+		return JiveGlobals.getProperty(INCREASE_BADGE_URL,
+				"http://ctalk/tttalk150214/utils/badge_count_increase.php");
 	}
 
 	public static String getClientId(String address) {

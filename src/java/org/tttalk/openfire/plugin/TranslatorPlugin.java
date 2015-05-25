@@ -266,6 +266,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				Element tttalk = msg.getChildElement(TAG_TTTALK,
 						TTTALK_NAMESPACE);
 				if (tttalk != null) {
+					increaseChatBadgeCount(msg.getTo());
 					String from_lang = tttalk.attributeValue("from_lang");
 					String to_lang = tttalk.attributeValue("to_lang");
 					String type = tttalk.attributeValue("type");
@@ -320,6 +321,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							tttalk.addAttribute("message_id", message_id);
 						}
 					}
+
 				}
 
 				/**
@@ -608,6 +610,23 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			_manualTranslate(from, to, message_id, from_lang, to_lang, text,
 					filetype, content_length);
 
+		}
+	}
+
+	private void increaseChatBadgeCount(JID to) {
+		String userid = getTTTalkId(to);
+
+		Map<String, String> postParams = new HashMap<String, String>();
+
+		postParams.put("userid", userid);
+		postParams.put("loginid", userid);
+		postParams.put("badge_key", "message");
+
+		try {
+			log.info("increase badge count=" + userid);
+			Utils.post(Utils.getBadgeCountIncreaseUrl(), postParams);
+		} catch (Exception e) {
+			log.error("increase badge Exception=" + e.getMessage());
 		}
 	}
 
