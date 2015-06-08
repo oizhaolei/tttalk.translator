@@ -71,6 +71,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final String TAG_CANCEL = "cancel";
 
 	private static final String CHAT_TYPE_TEXT = "text";
+	private static final String CHAT_TYPE_VOICE = "voice";
 	private static final int AUTO_BAIDU = 2;
 	private static final int AUTO_MANUAL = 1;
 	private static final int AUTO_NONE = 0;
@@ -271,11 +272,14 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 					String from_lang = tttalk.attributeValue("from_lang");
 					String to_lang = tttalk.attributeValue("to_lang");
 					String type = tttalk.attributeValue("type");
+					String filePath = tttalk.attributeValue("file_path");
 					// String auto_translate = tttalk
 					// .attributeValue("auto_translate");
 					log.info(msg.toXML());
-					if (from_lang != null && to_lang != null
-							&& CHAT_TYPE_TEXT.equalsIgnoreCase(type)
+					if (from_lang != null
+							&& to_lang != null
+							&& (CHAT_TYPE_TEXT.equalsIgnoreCase(type) || CHAT_TYPE_VOICE
+									.equalsIgnoreCase(type))
 							&& !from_lang.equalsIgnoreCase(to_lang)) {
 						String auto_translate = null;
 						String username = getUsernameFromJID(msg.getTo());
@@ -302,16 +306,18 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 							log.info("AUTO_MANUAL START");
 							requestManualTranslate(msg.getFrom(), msg.getTo(),
 									message_id, from_lang, to_lang,
-									msg.getBody(), type,
+									msg.getBody(), type, filePath,
 									tttalk.attributeValue("content_length"));
 							log.info("AUTO_MANUAL END");
 							break;
 						case AUTO_BAIDU:
 
 							log.info("AUTO_BAIDU");
-							requestBaiduTranslate(msg.getFrom(), msg.getTo(),
-									message_id, from_lang, to_lang,
-									msg.getBody());
+							if (CHAT_TYPE_TEXT.equalsIgnoreCase(type)) {
+								requestBaiduTranslate(msg.getFrom(),
+										msg.getTo(), message_id, from_lang,
+										to_lang, msg.getBody());
+							}
 							break;
 						}
 					} else {
@@ -590,12 +596,13 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		String from_lang;
 		String to_lang;
 		String text;
+		String filePath;
 		String filetype;
 		String content_length;
 
 		public ManualTranslateRunnable(JID from, JID to, String message_id,
 				String from_lang, String to_lang, String text, String filetype,
-				String content_length) {
+				String filePath, String content_length) {
 			this.from = from;
 			this.to = to;
 			this.message_id = message_id;
@@ -603,13 +610,14 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			this.to_lang = to_lang;
 			this.text = text;
 			this.filetype = filetype;
+			this.filePath = filePath;
 			this.content_length = content_length;
 		}
 
 		@Override
 		public void run() {
 			_manualTranslate(from, to, message_id, from_lang, to_lang, text,
-					filetype, content_length);
+					filetype, filePath, content_length);
 
 		}
 	}
@@ -633,7 +641,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 	private void _manualTranslate(JID from, JID to, String message_id,
 			String from_lang, String to_lang, String text, String filetype,
-			String content_length) {
+			String filePath, String content_length) {
 		String userid = getTTTalkId(to);
 
 		Map<String, String> postParams = new HashMap<String, String>();
@@ -647,6 +655,8 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		postParams.put("local_id", message_id);
 		postParams.put("content_length", content_length);
 		postParams.put("to_userid", getTTTalkId(from));
+		if (!CHAT_TYPE_TEXT.equalsIgnoreCase(filetype))
+			postParams.put("file_path", filePath);
 
 		try {
 			Utils.post(Utils.getManualTranslateUrl(), postParams);
@@ -657,12 +667,12 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 	public void requestManualTranslate(JID from, JID to, String message_id,
 			String from_lang, String to_lang, String text, String filetype,
-			String content_length) {
+			String filePath, String content_length) {
 		// new Thread(new ManualTranslateRunnable(from, to, message_id,
 		// from_lang,
 		// to_lang, text, filetype, content_length), "Manual").start();
 		_manualTranslate(from, to, message_id, from_lang, to_lang, text,
-				filetype, content_length);
+				filetype, filePath, content_length);
 	}
 
 	private String parseBaiduResponse(String body) {
