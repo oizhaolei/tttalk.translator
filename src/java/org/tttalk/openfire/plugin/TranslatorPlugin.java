@@ -180,6 +180,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 			String userid, String from_lang, String to_lang, String file_path,
 			String file_type, String file_length, String from_content,
 			String to_content, String create_date) {
+		log.info("oldVersionTranslated");
 		Message message = new Message();
 		message.setType(Message.Type.chat);
 		message.setID(userid);

@@ -124,12 +124,12 @@ public class Utils {
 	}
 
 	public static String post(String url, Map<String, String> params) {
-		log.info("get request=" + url);
+		log.info("post request=" + url);
 		params = Utils.genParams(params.get("loginid"), params);
 
 		logParameters(params);
 		String body = HttpRequest.post(url).form(params).body();
-		log.info("get response=" + body);
+		log.info("post response=" + body);
 		return body;
 	}
 
