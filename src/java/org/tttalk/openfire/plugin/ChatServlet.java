@@ -25,9 +25,12 @@ public class ChatServlet extends AbstractTranslatorServlet {
 
 		String from_user_id = request.getParameter("from_user_id");
 		String to_user_id = request.getParameter("to_user_id");
+		String subject = request.getParameter("subject");
 		String content = request.getParameter("content");
+		String link = request.getParameter("link");
+		String pic = request.getParameter("pic");
 
-		plugin.chat(from_user_id, to_user_id, content);
+		plugin.chat(from_user_id, to_user_id, subject, content, link, pic);
 		PrintWriter out = response.getWriter();
 		out.println("success");
 	}

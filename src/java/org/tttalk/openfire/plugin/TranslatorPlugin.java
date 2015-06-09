@@ -59,6 +59,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	private static final String TAG_TRANSLATING = "translating";
 	private static final String TAG_TTTALK = "tttalk";
 	private static final String TAG_OLD_VERSION_TRANSLATED = "old_version_translated";
+	private static final String TAG_CHAT = "chat";
 
 	private static final String REQUEST_TAG = "request";
 	private static final String RECEIVED_TAG = "received";
@@ -214,13 +215,22 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		}
 	}
 
-	public void chat(String from_user_id, String to_user_id, String from_content) {
+	public void chat(String from_user_id, String to_user_id, String subject,
+			String from_content, String link, String pic) {
 		Message message = new Message();
 		message.setType(Message.Type.chat);
 		message.setID(from_user_id);
 
 		message.setFrom(createXMPPuser(from_user_id));
+		message.setSubject(subject);
 		message.setBody(from_content);
+
+		Element tttalkNode = message
+				.addChildElement(TAG_CHAT,
+				TTTALK_NAMESPACE);
+
+		tttalkNode.addAttribute("link", link);
+		tttalkNode.addAttribute("pic", pic);
 
 		addRequestReceipts(message);
 
