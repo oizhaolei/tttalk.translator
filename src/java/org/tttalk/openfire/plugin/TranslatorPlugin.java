@@ -697,7 +697,6 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
     	  String userid = getTTTalkId(from);
           Map<String, String> postParams = new HashMap<String, String>();
           postParams.put("loginid", userid);
-          postParams.put("source", Utils.getSource());
           postParams.put("question", question);
           postParams = Utils.genParams(userid, postParams);
           try {
