@@ -18,10 +18,13 @@ public class Utils {
 	private static final String OFFLINE_HANDLE = "tttalk.offline.handle";
 	private static final String BAIDU_TRANSLATE_URL = "tttalk.baidu.url";
 	private static final String MANUAL_TRANSLATE_URL = "tttalk.manual.url";
+    private static final String USER_QA_URL = "tttalk.qa.url";
 	private static final String INCREASE_BADGE_URL = "tttalk.increatebadge.url";
 	private static final String TTTALK_APP_SECRET = "tttalk.app.secret";
 	private static final String TTTALK_GEARMAN_HOST = "tttalk.gearman.host";
 	private static final String TTTALK_GEARMAN_PORT = "tttalk.gearman.prt";
+	
+	private static final String TTTALK_SYSTEM_ID = "tttalk.system.id";
 
 	private static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5',
 			'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
@@ -145,6 +148,10 @@ public class Utils {
 	public static int getGearmanPort() {
 		return JiveGlobals.getIntProperty(TTTALK_GEARMAN_PORT, 4730);
 	}
+	
+	public static String getSystemId() {
+	    return JiveGlobals.getProperty(TTTALK_SYSTEM_ID, "20");
+	}
 
 	public static boolean getOfflineHandle() {
 		return JiveGlobals.getBooleanProperty(OFFLINE_HANDLE, true);
@@ -157,7 +164,7 @@ public class Utils {
 	public static String getBaiduTranslateUrl() {
 		return JiveGlobals
 				.getProperty(BAIDU_TRANSLATE_URL,
-						"http://ctalk/tttalk150214/message/message_request_baidu_translate.php");
+						"http://ctalk2/tttalk150704/message/message_request_baidu_translate.php");
 	}
 
 	public static void setManualTranslateUrl(String url) {
@@ -167,12 +174,18 @@ public class Utils {
 	public static String getManualTranslateUrl() {
 		return JiveGlobals
 				.getProperty(MANUAL_TRANSLATE_URL,
-						"http://ctalk/tttalk150214/message/message_request_translate.php");
+						"http://ctalk2/tttalk150704/message/message_request_translate.php");
 	}
+
+    public static String getAddQaUrl() {
+        return JiveGlobals
+                .getProperty(USER_QA_URL,
+                        "http://ctalk2/tttalk150704/help/qa_add.php");
+    }
 
 	public static String getBadgeCountIncreaseUrl() {
 		return JiveGlobals.getProperty(INCREASE_BADGE_URL,
-				"http://ctalk/tttalk150214/utils/badge_count_increase.php");
+				"http://ctalk2/tttalk150704/utils/badge_count_increase.php");
 	}
 
 	public static String getClientId(String address) {

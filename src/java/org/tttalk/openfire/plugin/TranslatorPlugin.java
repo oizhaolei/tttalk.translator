@@ -216,7 +216,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 	}
 
 	public void chat(String from_user_id, String to_user_id, String subject,
-			String from_content, String link, String pic) {
+			String from_content, String link, String pic, String type) {
 		Message message = new Message();
 		message.setType(Message.Type.chat);
 		message.setID(from_user_id);
@@ -231,6 +231,7 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 
 		tttalkNode.addAttribute("link", link);
 		tttalkNode.addAttribute("pic", pic);
+        tttalkNode.addAttribute("type", type);
 
 		addRequestReceipts(message);
 
@@ -278,11 +279,18 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 				Element tttalk = msg.getChildElement(TAG_TTTALK,
 						TTTALK_NAMESPACE);
 				if (tttalk != null) {
+                  String from_lang = tttalk.attributeValue("from_lang");
+                  String to_lang = tttalk.attributeValue("to_lang");
+                  String type = tttalk.attributeValue("type");
+                  String filePath = tttalk.attributeValue("file_path");
+				    //qa
+				    String toUserId = getTTTalkId(msg.getTo());
+				    if(toUserId.equals(Utils.getSystemId())){
+				      requestAddQa(msg.getFrom(), msg.getBody());
+                      log.info("ADD_QA END");
+				      return;
+				    }
 					increaseChatBadgeCount(msg.getTo());
-					String from_lang = tttalk.attributeValue("from_lang");
-					String to_lang = tttalk.attributeValue("to_lang");
-					String type = tttalk.attributeValue("type");
-					String filePath = tttalk.attributeValue("file_path");
 					// String auto_translate = tttalk
 					// .attributeValue("auto_translate");
 					log.info(msg.toXML());
@@ -683,6 +691,20 @@ public class TranslatorPlugin implements Plugin, PacketInterceptor {
 		// to_lang, text, filetype, content_length), "Manual").start();
 		_manualTranslate(from, to, message_id, from_lang, to_lang, text,
 				filetype, filePath, content_length);
+	}
+	
+	public void requestAddQa(JID from, String question){
+    	  String userid = getTTTalkId(from);
+          Map<String, String> postParams = new HashMap<String, String>();
+          postParams.put("loginid", userid);
+          postParams.put("source", Utils.getSource());
+          postParams.put("question", question);
+          postParams = Utils.genParams(userid, postParams);
+          try {
+              Utils.get(Utils.getAddQaUrl(), postParams);
+          } catch (Exception e) {
+              log.error("Exception=" + e.getMessage());
+          }
 	}
 
 	private String parseBaiduResponse(String body) {

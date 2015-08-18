@@ -29,8 +29,9 @@ public class ChatServlet extends AbstractTranslatorServlet {
 		String content = request.getParameter("content");
 		String link = request.getParameter("link");
 		String pic = request.getParameter("pic");
+        String type = request.getParameter("type");
 
-		plugin.chat(from_user_id, to_user_id, subject, content, link, pic);
+		plugin.chat(from_user_id, to_user_id, subject, content, link, pic, type);
 		PrintWriter out = response.getWriter();
 		out.println("success");
 	}
